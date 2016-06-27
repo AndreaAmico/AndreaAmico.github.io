@@ -1,13 +1,6 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely need to edit after that.
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'jekyll serve'. If you change this file, please restart the server process.
-
 # Site settings
 title: Code pills
-email: your-email@domain.com
+email: amico.andrea.90@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   I'm just too lazy to use dropbox or github to copy paste code for everyday science scripts.
   Need to fit some cute data points? Need to analyse your favoutite images?
@@ -15,9 +8,17 @@ description: > # this means to ignore newlines until "baseurl:"
   I hope not, infact i write it for me. If you want to steel something, feel free to copy-paste at your own risk,
   you will probably find a forest of bugs.
 
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://yourdomain.com" # the base hostname & protocol for your site
+url: "http://andreaamico.github.io" # the base hostname & protocol for your site
 github_username:  AndreaAmico
 
 # Build settings
 markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  # use Github Flavored Markdown
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+  # do not replace newlines by <br>s
+  hard_wrap: false
