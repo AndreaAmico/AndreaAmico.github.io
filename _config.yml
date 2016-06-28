@@ -14,6 +14,7 @@ github_username:  AndreaAmico
 # Build settings
 markdown: kramdown
 highlighter: rouge
+excerpt_separator: ""
 
 kramdown:
   # use Github Flavored Markdown
