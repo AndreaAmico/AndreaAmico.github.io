@@ -5,6 +5,15 @@ date:   2016-06-28 17:00:21 +0100
 categories: python
 ---
 
+Sine function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.
+The initial parameters guess is estimated in the following way:
+
+**Offset and amplitude:** Calculate the mean of the higher and lower *max_min_estimation_size (default=5)* data points. Half of the diference 
+gives an estimation for the amplitude and the mean gives an estimation for the offset.
+
+**Frequency:** An estimation for the frequency is obtained using the [lombscargle algorithm](https://en.wikipedia.org/wiki/Least-squares_spectral_analysis "https://en.wikipedia.org/wiki/Least-squares_spectral_analysis") with a *frequency_grid_size (default=100)* comb of frequency. The minim frequecy considered is given by the inverse of the total time *np.max(x_data) - np.min(x_data)*, while the maximum frequency is equal to the minimum frequency times the number of *x* data point.
+
+
 {% highlight python %}
 def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5, report=True, plot=True):
     """ NB: Requires numpy, lmfit, scipy and matplotlib if plot=True
@@ -29,9 +38,7 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
     normval = x_data.shape[0]
     max_frequency = min_frequency*normval
 
-
     frequency_grid = np.linspace(min_frequency, max_frequency, frequency_grid_size)
-
         
     pgram = signal.lombscargle(x_data, y_data_centred, frequency_grid)
 
@@ -52,7 +59,7 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
         return (data - model)
 
     params = lmfit.Parameters()
-    params.add('amp', value=y_data_max-y_data_min)
+    params.add('amp', value=(y_data_max-y_data_min)/2.)
     params.add('offset', value=y_data_offset)
     params.add('phase', value=0.0, min=-np.pi/2., max=np.pi/2.)
     params.add('frequency', value=central_frequency, min=0)
