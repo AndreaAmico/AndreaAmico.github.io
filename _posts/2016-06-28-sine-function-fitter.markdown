@@ -68,15 +68,57 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
     
     if plot:
         import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(1,2, figsize=(15, 5))
+        fig, ax = plt.subplots(1,2, figsize=(12, 4))
         ax[0].scatter(frequency_grid, lombscargle_spectrum)
-        ax[0].axvline(central_frequency, c="green")        
-        ax[1].scatter(x_data, y_data)
+        ax[0].axvline(central_frequency, c="green") 
+        ax[0].set_xlabel("x_data")
+        ax[0].set_ylabel("Lomb Scargle spectrum")    
+
         x_plot = np.linspace(np.min(x_data), np.max(x_data), 100)
+        ax[1].scatter(x_data, y_data)
         ax[1].plot(x_plot, sin_function(out.params, x_plot), c="green")
+        ax[1].set_xlabel("x_data")
+        ax[1].set_ylabel("y_data")       
+        
+        # fig.savefig("out.svg")
         plt.show()   
 
     if report: lmfit.report_fit(out, show_correl=False)
 
     return out
+{% endhighlight %}
+
+Example
+----------------------------
+
+{% highlight python %}
+off = 5
+freq = 3
+amp = 2
+phi = 1
+
+x = np.linspace(0,6,50)
+noise = (np.random.random(x.shape[0])-0.5)
+data = np.cos(freq*x* + phi)*amp + off + noise*3
+
+out = fit_sine(x, data)
+{% endhighlight %}
+Figure output:
+
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/sine-fitter-output.svg%}
+
+Text output:
+{% highlight python %}
+[[Fit Statistics]]
+    # function evals   = 56
+    # data points      = 50
+    # variables        = 4
+    chi-square         = 38.981
+    reduced chi-square = 0.847
+    Akaike info crit   = -0.279
+    Bayesian info crit = 7.369
+[[Variables]]
+    amp:         1.94390338 +/- 0.186334 (9.59%) (init= 2.721456)
+    offset:      5.17910117 +/- 0.134196 (2.59%) (init= 5.24784)
+    phase:       1.57079593 +/- 0.193860 (12.34%) (init= 0)
 {% endhighlight %}
