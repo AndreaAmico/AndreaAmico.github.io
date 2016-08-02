@@ -23,6 +23,9 @@ The initial parameters guess is estimated in the following way:
 {% highlight python %}
 def fit_gaussian(x_data, y_data, report=True, plot=True):
     """ NB: Requires numpy, lmfit,and matplotlib if plot=True
+        function form: off + amp * np.exp(-(x-x0)**2/(2*sigma**2))
+        variable name: ['amplitude', 'offset', 'peak_position', 'sigma']
+        to extract parameters from the output use: out.params["amplitude"].value
     """
     import numpy as np
     import lmfit
@@ -62,10 +65,10 @@ def fit_gaussian(x_data, y_data, report=True, plot=True):
     
     def gauss_function(params, x):
         amp = params['amplitude'].value
-        s = params['sigma'].value
-        x0 = params['peak_position']
-        off = params['offset']    
-        return off + amp * np.exp(np.float64(-(x-x0)**2/(2*sigma**2)))
+        sigma = params['sigma'].value
+        x0 = params['peak_position'].value
+        off = params['offset'].value
+        return off + amp * np.exp(-(x-x0)**2/(2*sigma**2))
 
     def residual(params, x, data):
         model = gauss_function(params, x)
@@ -87,15 +90,49 @@ def fit_gaussian(x_data, y_data, report=True, plot=True):
         plt.xlabel("x_data")
         plt.ylabel("y_data")       
 
-        # fig.savefig("out.svg")
-        plt.show()   
+#         plt.savefig("out.svg")
+        plt.show()
 
     if report: lmfit.report_fit(out, show_correl=False)
         
     return out
+
 {% endhighlight %}
 
 Example
 ----------------------------
 
+{% highlight python %}
+off = 1
+amp = -2
+x0 = 2
+sigma = 1
+
+noise = np.random.random(100)-0.5
+x_data = (np.random.random(100)-0.5)*10
+y_data = off + amp*np.exp(-(x_data-x0)**2/(2*sigma**2)) + noise
+
+fit_gaussian(x_data, y_data)
+{% endhighlight %}
+
+Figure output:
+
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/gauss-fitter-output.svg%}
+
+Text output:
+{% highlight python %}
+[[Fit Statistics]]
+    # function evals   = 33
+    # data points      = 100
+    # variables        = 4
+    chi-square         = 32.849
+    reduced chi-square = 0.342
+    Akaike info crit   = -99.243
+    Bayesian info crit = -88.822
+[[Variables]]
+    amplitude:      -2.43280018 +/- 0.198035 (8.14%) (init=-3.902941)
+    offset:          0.97912407 +/- 0.084108 (8.59%) (init= 1.957917)
+    peak_position:   2.00695831 +/- 0.072144 (3.59%) (init= 2.21673)
+    sigma:           0.87205535 +/- 0.088285 (10.12%) (init= 1.938921)
+{% endhighlight %}
 
