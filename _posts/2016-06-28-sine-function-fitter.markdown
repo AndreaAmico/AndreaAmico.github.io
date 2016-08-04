@@ -2,7 +2,7 @@
 layout: post
 title:  "Sine function fitter"
 date:   2016-06-28 17:00:21 +0100
-categories: python
+categories: data_analysis
 ---
 
 Sine function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.

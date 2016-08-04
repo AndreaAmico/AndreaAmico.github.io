@@ -2,7 +2,7 @@
 layout: post
 title:  "Gaussian function fitter"
 date:   2016-07-01 12:30:20 +0100
-categories: python
+categories: data_analysis
 ---
 
 Gaussian function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.
