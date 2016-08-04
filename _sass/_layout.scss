@@ -1,6 +1,69 @@
 /**
  * Site header
  */
+
+.site-head {
+    border-top: 50px solid $background-color;
+    height: 56px;
+    border-bottom: 100px solid $background-color;
+    background: $red-color; 
+}
+
+.site-title {
+    font-size: 80px;
+    margin-left: 10%;
+    margin-top: -28px;
+    font-family: lato;
+    text-transform: uppercase;
+    color: $background-color;
+}
+
+.pinkish {
+    color: $pink-color;
+    font-weight: bold;
+    font-size: 78px;
+}
+
+.header-nav  {
+    float: right;
+    margin-right: 10%;
+}
+
+.header-button {
+    float: right;
+    margin-right: 10px;
+    background: $pink-color;
+    height: 70px;
+    width: 70px;
+    margin-top: 56px;
+}
+
+.header-button-top {
+    float: right;
+    margin-right: -70px;
+    background: $pink-color;
+    height: 10px;
+    width: 70px;
+    margin-top: -10px;
+}
+
+.header-button-right {
+    float: right;
+    background: $light-red-color;
+    height: 70px;
+    width: 70px;
+    margin-top: 56px;
+}
+
+.header-button-right-top {
+    float: right;
+    margin-right: -70px;
+    background: $light-red-color;
+    height: 10px;
+    width: 70px;
+    margin-top: -10px;
+}
+
 .site-header {
     border-top: 5px solid $grey-color-dark;
     border-bottom: 1px solid $grey-color-light;
@@ -10,19 +73,17 @@
     position: relative;
 }
 
-.site-title {
-    font-size: 26px;
-    font-weight: 300;
-    line-height: 56px;
-    letter-spacing: -1px;
-    margin-bottom: 0;
-    float: left;
-
-    &,
-    &:visited {
-        color: $grey-color-dark;
+.header-icon {
+    > svg {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        margin-left: 10px;
+        margin-top: 10px;
     }
 }
+
+
 
 .site-nav {
     float: right;
