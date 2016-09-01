@@ -11,10 +11,10 @@
 
 
 .site-title {
-    font-size: 80px;
+    font-size: 78px;
     margin-left: 10%;
-    margin-top: -34px;
-    font-family: 'lato';
+    margin-top: -26px;
+    font-family: $lato-font;
     text-transform: uppercase;
     color: $background-color;
 }
@@ -22,7 +22,7 @@
 .pinkish {
     color: $pink-color;
     font-weight: bold;
-    font-size: 76px;
+    font-size: 74px;
 }
 
 .header-nav  {
