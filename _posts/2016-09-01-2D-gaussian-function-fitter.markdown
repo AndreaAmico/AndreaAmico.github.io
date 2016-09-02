@@ -9,7 +9,6 @@ Gaussian function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "ht
 The initial parameters guess is estimated in the following way:
 
 
-
 {% highlight python %}
 def fit_gaussian(x_data, y_data, report=True, plot=True):
     """ NB: Requires numpy, lmfit,and matplotlib if plot=True
@@ -158,6 +157,7 @@ def fit_gaussian_2d(data, report=True, plot=True):
         #plt.savefig("out.svg")
         plt.show()   
     if report: lmfit.report_fit(out, show_correl=False)
+    return out
 {% endhighlight %}
 
 Example
@@ -202,3 +202,13 @@ Text output:
     sigma_y:     6.99834827 +/- 0.058263 (0.83%) (init= 7.036165)
 {% endhighlight %}
 
+Support functions
+----------------------------------------
+{% highlight python %}
+def gaussian_2d_volume(out):
+    import numpy as np
+    sx = out.params["sigma_x"].value
+    sy = out.params["sigma_y"].value
+    amp = out.params["amplitude"].value
+    return 2*np.pi*sx*sy*amp
+{% endhighlight %}
