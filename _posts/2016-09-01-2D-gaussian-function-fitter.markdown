@@ -87,7 +87,84 @@ def fit_gaussian(x_data, y_data, report=True, plot=True):
     return out
 
 
-def fit_gaussian_2d(data, report=True, plot=True):
+def fit_gaussian(x_data, y_data, report=True, plot=True):
+    """ NB: Requires numpy, lmfit,and matplotlib if plot=True
+        function form: off + amp * np.exp(-(x-x0)**2/(2*sigma**2))
+        variable name: ['amplitude', 'offset', 'peak_position', 'sigma']
+        to extract parameters from the output use: out.params["amplitude"].value        
+    """
+    import numpy as np
+    import lmfit
+
+    data_array = np.array([x_data, y_data]).T
+    x_sorted_data = data_array[np.argsort(data_array[:,0])]
+    y_sorted_data = data_array[np.argsort(data_array[:,1])]
+
+    min_y = y_sorted_data[0, :]
+    max_y = y_sorted_data[-1, :]
+
+    min_x = x_sorted_data[0, :]
+    max_x = x_sorted_data[-1, :]
+
+
+    if np.abs((min_x[1] + max_x[1])/2 - min_y[1]) < np.abs((min_x[1] + max_x[1])/2 - max_y[1]):
+        amp_sign = 1
+        peak_position = max_y[0]
+        offset = min_y[1]
+    else:
+        amp_sign = -1
+        peak_position = min_y[0]
+        offset = max_y[1]
+
+    amplitude = amp_sign*np.abs(max_y[1] - min_y[1])
+
+    right_side = x_sorted_data[x_sorted_data[:, 0]>peak_position, :]
+    left_side = x_sorted_data[x_sorted_data[:, 0]<peak_position, :]
+
+    right_side[:, 1] = np.abs(right_side[:, 1] - offset - amplitude/2)
+    right_fwhm = right_side[np.where(right_side[:, 1]==np.min(right_side[:, 1]))[0],0]
+
+    left_side[:, 1] = np.abs(left_side[:, 1] - offset - amplitude/2)
+    left_fwhm = left_side[np.where(left_side[:, 1]==np.min(left_side[:, 1]))[0],0]
+
+    sigma = ((right_fwhm - left_fwhm) / (2*np.sqrt(2 * np.log(2))))[0]
+    
+    def gauss_function(params, x):
+        amp = params['amplitude'].value
+        sigma = params['sigma'].value
+        x0 = params['peak_position'].value
+        off = params['offset'].value
+        return off + amp * np.exp(-(x-x0)**2/(2*sigma**2))
+
+    def residual(params, x, data):
+        model = gauss_function(params, x)
+        return (data - model)
+
+    params = lmfit.Parameters()
+    params.add('amplitude', value=amplitude)
+    params.add('offset', value=offset)
+    params.add('peak_position', value=peak_position)
+    params.add('sigma', value=sigma)
+
+    out = lmfit.minimize(residual, params, args=(data_array[:, 0], data_array[:, 1]))
+
+    if plot:
+        import matplotlib.pyplot as plt
+        x_plot = np.linspace(np.min(x_data), np.max(x_data), 100)
+        plt.scatter(x_data, y_data)
+        plt.plot(x_plot, gauss_function(out.params, x_plot), c="green")
+        plt.xlabel("x_data")
+        plt.ylabel("y_data")       
+
+#         plt.savefig("out.svg")
+        plt.show()
+
+    if report: lmfit.report_fit(out, show_correl=False)
+        
+    return out
+
+
+def fit_gaussian_2d(data, angle=None, report=True, plot=True):
     """ NB: Requires numpy, lmfit,and matplotlib if plot=Truie
     function form: off + amp * np.exp(-(xy[0]-x0)**2/(2*sx**2))*np.exp(-(xy[1]-y0)**2/(2*sy**2))
     variable name: ['amplitude', 'offset', 'peak_position', 'sigma']
@@ -109,16 +186,30 @@ def fit_gaussian_2d(data, report=True, plot=True):
     offset = (out_x.params["offset"].value + out_y.params["offset"].value)/2
     amplitude = (out_x.params["amplitude"].value + out_y.params["amplitude"].value)/2
 
+    if angle:
+        def gauss_function_2d(params, xy):
+            amp = params['amplitude'].value
+            off = params['offset'].value
+            sx = params['sigma_x'].value
+            sy = params['sigma_y'].value
+            x0 = params['x0'].value
+            y0 = params['y0'].value
+            t = np.deg2rad(params['angle'].value)
+            
+            x_exp = np.exp(-((xy[0]-x0)*np.cos(t)+(xy[1]-y0)*np.sin(t))**2/(2*sx**2))
+            y_exp = np.exp(-((xy[1]-y0)*np.cos(t)+(xy[0]-x0)*np.sin(t))**2/(2*sy**2))
+            return off + amp * x_exp * y_exp
 
-    def gauss_function_2d(params, xy):
-        amp = params['amplitude'].value
-        off = params['offset'].value
-        sx = params['sigma_x'].value
-        sy = params['sigma_y'].value
-        x0 = params['x0'].value
-        y0 = params['y0'].value
-
-        return off + amp * np.exp(-(xy[0]-x0)**2/(2*sx**2))*np.exp(-(xy[1]-y0)**2/(2*sy**2))
+    else:
+        def gauss_function_2d(params, xy):
+            amp = params['amplitude'].value
+            off = params['offset'].value
+            sx = params['sigma_x'].value
+            sy = params['sigma_y'].value
+            x0 = params['x0'].value
+            y0 = params['y0'].value
+            
+            return off + amp * np.exp(-(xy[0]-x0)**2/(2*sx**2))*np.exp(-(xy[1]-y0)**2/(2*sy**2))
 
     def residual(params, xy, data):
         model = gauss_function_2d(params, xy)
@@ -133,6 +224,7 @@ def fit_gaussian_2d(data, report=True, plot=True):
     params.add('y0', value=y0)
     params.add('sigma_x', value=sigma_x)
     params.add('sigma_y', value=sigma_y)
+    if angle: params.add('angle', value=angle)
 
     out = lmfit.minimize(residual, params, args=(xy, data))
     if plot:
@@ -158,6 +250,7 @@ def fit_gaussian_2d(data, report=True, plot=True):
         plt.show()   
     if report: lmfit.report_fit(out, show_correl=False)
     return out
+
 {% endhighlight %}
 
 Example
