@@ -7,7 +7,19 @@ categories: data_analysis
 
 Gaussian function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.
 The initial parameters guess is estimated in the following way:
+--TODO--
+parameters:
 
+import lmfit
+params = lmfit.Parameters()
+params.add('amplitude', value=2)
+params.add('offset', value=1)
+params.add('x0', value=25)
+params.add('y0', value=20)
+params.add('sigma_x', value=10)
+params.add('sigma_y', value=10)
+
+fit_gaussian_2d(data, initial_params=params)
 
 {% highlight python %}
 def fit_gaussian(x_data, y_data, report=True, plot=True):
@@ -91,7 +103,7 @@ def fit_gaussian(x_data, y_data, report=True, plot=True):
     """ NB: Requires numpy, lmfit,and matplotlib if plot=True
         function form: off + amp * np.exp(-(x-x0)**2/(2*sigma**2))
         variable name: ['amplitude', 'offset', 'peak_position', 'sigma']
-        to extract parameters from the output use: out.params["amplitude"].value        
+        to extract parameters from the output use: out.params["amplitude"].value
     """
     import numpy as np
     import lmfit
@@ -164,27 +176,36 @@ def fit_gaussian(x_data, y_data, report=True, plot=True):
     return out
 
 
-def fit_gaussian_2d(data, angle=None, report=True, plot=True):
+def fit_gaussian_2d(data, angle=None, report=True, plot=True, initial_params=None):
     """ NB: Requires numpy, lmfit,and matplotlib if plot=Truie
     function form: off + amp * np.exp(-(xy[0]-x0)**2/(2*sx**2))*np.exp(-(xy[1]-y0)**2/(2*sy**2))
-    variable name: ['amplitude', 'offset', 'peak_position', 'sigma']
+    variable name: ['amplitude', 'offset', 'x0', 'y0', 'sigma_x', 'sigma_y', ('angle')]
     to extract parameters from the output use: out.params["amplitude"].value        
     """
     
     import numpy as np
     import lmfit
     
-    out_x = fit_gaussian(np.arange(data.shape[1]), np.mean(data, 0), report=False, plot=False)
-    out_y = fit_gaussian(np.arange(data.shape[0]), np.mean(data, 1), report=False, plot=False)
+    if initial_params:
+        x0 = initial_params["x0"].value
+        y0 = initial_params["y0"].value
+        sigma_x = initial_params["sigma_x"].value
+        sigma_y = initial_params["sigma_y"].value
+        offset = initial_params["offset"].value
+        amplitude = initial_params["amplitude"].value
+        
+    else:
+        out_x = fit_gaussian(np.arange(data.shape[1]), np.mean(data, 0), report=False, plot=False)
+        out_y = fit_gaussian(np.arange(data.shape[0]), np.mean(data, 1), report=False, plot=False)
 
-    x0 = out_x.params["peak_position"].value
-    y0 = out_y.params["peak_position"].value
+        x0 = out_x.params["peak_position"].value
+        y0 = out_y.params["peak_position"].value
 
-    sigma_x = out_x.params["sigma"].value
-    sigma_y = out_y.params["sigma"].value
+        sigma_x = out_x.params["sigma"].value
+        sigma_y = out_y.params["sigma"].value
 
-    offset = (out_x.params["offset"].value + out_y.params["offset"].value)/2
-    amplitude = (out_x.params["amplitude"].value + out_y.params["amplitude"].value)/2
+        offset = (out_x.params["offset"].value + out_y.params["offset"].value)/2
+        amplitude = (out_x.params["amplitude"].value + out_y.params["amplitude"].value)/2
 
     if angle:
         def gauss_function_2d(params, xy):
@@ -250,7 +271,6 @@ def fit_gaussian_2d(data, angle=None, report=True, plot=True):
         plt.show()   
     if report: lmfit.report_fit(out, show_correl=False)
     return out
-
 {% endhighlight %}
 
 Example
