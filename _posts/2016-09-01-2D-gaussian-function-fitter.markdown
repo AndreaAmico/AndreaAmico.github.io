@@ -8,8 +8,8 @@ categories: data_analysis
 Gaussian function fitter using the [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.
 The initial parameters guess is estimated in the following way:
 --TODO--
-parameters:
-
+Copy paste use
+{% highlight python %}
 import lmfit
 params = lmfit.Parameters()
 params.add('amplitude', value=2)
@@ -19,7 +19,8 @@ params.add('y0', value=20)
 params.add('sigma_x', value=10)
 params.add('sigma_y', value=10)
 
-fit_gaussian_2d(data, initial_params=params)
+fit_gaussian_2d(data, angle=8, report=False, plot=False, initial_params=params)
+{% endhighlight %}
 
 {% highlight python %}
 def fit_gaussian(x_data, y_data, report=True, plot=True):
