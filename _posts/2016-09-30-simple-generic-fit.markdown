@@ -7,7 +7,6 @@ categories: data_analysis
 
 Fitter prototype using [lmfit](https://lmfit.github.io/lmfit-py/ "https://lmfit.github.io/lmfit-py/") module.
 
---TODO--
 Copy paste use
 {% highlight python %}
 import matplotlib.pyplot as plt

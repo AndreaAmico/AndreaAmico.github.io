@@ -16,8 +16,7 @@ import pandas as pd
 import lmfit
 
 # Home made libraries
-import pyLi.friendmap as friendmap
-import pyLi.loadImages as loadimages
+# import pyLi.loadImages as loadimages
 
 
 # Loading constants
