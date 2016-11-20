@@ -1,0 +1,31 @@
+---
+layout: post
+title:  "Regular expressions"
+date:   2016-11-20 15:30:00 +0100
+categories: python
+---
+
+Findall method returns a list of the strings containing the matches:
+{% highlight python %}
+import re
+
+my_string = "My emails are xyz@mail.xor and zyx@liam.rox"
+
+for i, email in enumerate(re.findall("\S+@\S+", my_string)):
+    print("Email {}: {}".format(i, email))
+{% endhighlight %}
+Email 0: xyz@mail.xor
+Email 1: zyx@liam.rox
+
+If the position is needed as well one can use finditer. It returns a list of `re.MatchObject` objects.
+The main methods are `.group(group_index)`, that returns the matched string, `.start(group_index)`,
+that returns the position of the first character of the matched string in the original string, and `.end(group_index)`.
+`group_index` is needed when more than one parentheses () is used.
+
+{% highlight python %}
+for i, email in enumerate(re.finditer("\S+@\S+", my_string)):
+    print("Email {}: {}, starts at position: {} and ends at position: {}"
+        .format(i, email.group(0), email.start(0), email.end(0)))
+{% endhighlight %}
+Email 0: xyz@mail.xor, starts at position: 14 and ends at position: 26
+Email 1: zyx@liam.rox, starts at position: 31 and ends at position: 43
