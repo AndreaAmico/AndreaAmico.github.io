@@ -1,0 +1,57 @@
+---
+layout: post
+title:  "Communication over IP"
+date:   2016-12-11 10:30:00 +0100
+categories: python
+---
+
+{% highlight python %}
+import socket
+import struct
+
+class line(object):
+    def __init__(self, fmt='!I2sd', server=True, action=None, actionargs=[], ip='localhost', port=10000):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_address = (ip, port)
+        self.s = struct.Struct(fmt)
+        self.action = action
+        self.actionargs = actionargs
+        if not((type(self.actionargs) is list) or (type(self.actionargs) is tuple)):
+            self.actionargs = (self.actionargs,)
+
+        if server:
+            self.sock.bind(self.server_address)
+            self.sock.listen(1)
+            self.connection, client_address = self.sock.accept()
+        else:
+            CONNECTION_ATTEMPTS = 5
+            for i in range(CONNECTION_ATTEMPTS):
+                try:
+                    self.sock.connect(self.server_address)
+                    print("Connected with server.")
+                    break
+                except:
+                    import time
+                    print("Connection attempt "+str(i+1)+" of 5 failed.")
+                    SLEEP_BETWEEN_CONNECTION_ATTEMPTS = 1
+                    time.sleep(SLEEP_BETWEEN_CONNECTION_ATTEMPTS)
+            self.connection = self.sock
+
+        if self.action:
+            import threading
+            listener_thread = threading.Thread(target=self.listener)
+            listener_thread.start()
+
+    def listener(self): 
+        while True:
+            dataByte = self.connection.recv(self.s.size)
+            if dataByte:
+                self.action(self.s.unpack(dataByte), *self.actionargs)              
+
+    def send(self, message):
+        self.connection.sendall(self.s.pack(*message))
+
+    def __exit__(self):
+        self.sock.close()
+
+{% endhighlight %}
