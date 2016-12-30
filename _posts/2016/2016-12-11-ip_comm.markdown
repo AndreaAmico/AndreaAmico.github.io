@@ -5,11 +5,17 @@ date:   2016-12-11 10:30:00 +0100
 categories: python
 ---
 
+Simple data exchange between client and server over IP.
+
+The data is stored in a `Struct` and then packed to be sent as binary data. `fmt` is the description of the [struct](https://docs.python.org/3.1/library/struct.html "https://docs.python.org/3.1/library/struct.html") content. In the client-server example below `fmt = '!I30sd'`: the **!** refers to the byte-order convenction (big-endian for nework in this case), **I** stands for unsigned-int (4 bytes), **30s** stands for 30 char (1 byte each) and **d** stands for a double (8 bytes).
+
+`Line` can be initialized both as a client and as a server. The server application must be launched before the client. When data is sent, the listener application runs the function `action` with the data received as first argument. `actionargs` can be used to share variables (in the example below it is used for a queue object).
+
 {% highlight python %}
 import socket
 import struct
 
-class line(object):
+class Line(object):
     def __init__(self, fmt='!I2sd', server=True, action=None, actionargs=[], ip='localhost', port=10000):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_address = (ip, port)
@@ -53,5 +59,47 @@ class line(object):
 
     def __exit__(self):
         self.sock.close()
-
 {% endhighlight %}
+
+
+Server:
+{% highlight python %}
+import queue
+import threading
+import time
+import ipcomm
+
+def c_fun(data, jobs):
+    jobs.put(data)
+jobs = queue.Queue()
+
+def process_job(q):
+    while True:
+        a,b,c = q.get()
+        for i in range(a):
+            print(str(i)+": "+b.decode('utf-8'))
+            time.sleep(c)
+
+fmt='!I30sd'
+myServer = ipcomm.Line(fmt=fmt, server=True, action=c_fun, actionargs=jobs)
+pj = threading.Thread(target=process_job, args=(jobs,))
+pj.setDaemon(True)
+pj.start()
+{% endhighlight %}
+
+Client:
+{% highlight python %}
+import ipcomm
+
+fmt='!I30sd'
+
+myClient = ipcomm.Line(fmt=fmt, server=False)
+while(True):
+    a = int(input("\nNumber of repetition: "))
+    b = input("String to write: ").encode('utf-8')
+    c = float(input("Sleep time (s): "))
+    myClient.send((a, b, c))
+    print(" >>>>>> Struct sent to the client >>>>>>")
+{% endhighlight %}
+
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/server_client_example.html  %}
