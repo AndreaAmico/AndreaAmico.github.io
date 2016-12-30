@@ -31,6 +31,20 @@ Email 0: xyz@mail.xor, starts at position: 14 and ends at position: 26
 Email 1: zyx@liam.rox, starts at position: 31 and ends at position: 43
 
 ----------------
+
+- (?=**foo**): lookahead (asserts that what immediately follows the current position in the string is **foo**)
+- (?<=**foo**): lookbehind (asserts that what immediately precedes the current position in the string is foo**)
+- (?!**foo**):  negative lookahead (asserts that what immediately follows the current position in the string is not **foo**)
+- (?<!**foo**): negative lookbehind (asserts that what immediately precedes the current position in the string is not **foo**)
+
+Example:
+{% highlight python %}
+re.sub('(?<=\()(\d+)(?=\)\.txt$)', '6', 'my_file(5).txt')
+{% endhighlight %}
+
+returns *'my_file(6).txt'*.
+
+----------------
 A good cheat sheet by [tartley](https://github.com/tartley/python-regex-cheatsheet "https://github.com/tartley/python-regex-cheatsheet") is reported here:
 
 Non-special chars match themselves. Exceptions are special characters:
