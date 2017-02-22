@@ -55,7 +55,7 @@ ax.errorbar(x1, y1, err1, fmt='h', markerfacecolor=(0.5,0.5,1,0.7), markeredgeco
             markeredgewidth=1.0, linewidth=2,capsize=0)
 
 ax.plot(x2, y2, color="green", linestyle=':', linewidth=2 )
-ax.errorbar(x2, y2, err2_x, err2_y, fmt='H', color='green', alpha=0.5, markersize=10, label = 'Sin', capsize=0)
+ax.errorbar(x2, y2, err2_y, err2_x, fmt='H', color='green', alpha=0.5, markersize=10, label = 'Sin', capsize=0)
 ax.grid(True)
 ax.set_title('Remember to set a good title', **title_font)
 ax.set_xlabel('More ore less the x axis', **axis_font)
