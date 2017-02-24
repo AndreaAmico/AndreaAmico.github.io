@@ -7,7 +7,8 @@ categories: python
 
 {% highlight python %}
 def progress_bar(current_value, max_value):
-    progress = ((current_value + 1)/max_value)*100
+    progress = (current_value/max_value)*100
+    if progress>100: progress=100
     print('\r[{0}{1}] {2:.1f}%'.format('#'*int(progress/2), ' '*(50-int(progress/2)), progress), end='')
 
 for index, item in enumerate(items):
