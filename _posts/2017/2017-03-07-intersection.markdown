@@ -5,7 +5,6 @@ date:   2017-03-07 23:00:00 +0100
 categories: python
 ---
 
-
 {% highlight python %}
 def merge_arrays(x_np_array, y_np_array):
     from functools import reduce
