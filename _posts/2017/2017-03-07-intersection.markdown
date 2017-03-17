@@ -1,9 +1,11 @@
 ---
 layout: post
-title:  "Numpy array intersection"
+title:  "List and numpy array merging"
 date:   2017-03-07 23:00:00 +0100
 categories: python
 ---
+
+Merging numpy arrays:
 
 {% highlight python %}
 def merge_arrays(x_np_array, y_np_array):
@@ -29,3 +31,20 @@ cc = np.array([3, 1, 1, 1, 1])
 merge_arrays([a, b, c], [aa, bb, cc])
 {% endhighlight %}
 [array([1, 3]), array([11, 33]), array([2, 6]), array([1, 3])]
+
+
+-----------------
+
+Merging lists:
+
+{% highlight python %}
+def list_merge(list_x1, list_y1, list_x2, list_y2):
+    try: new_list_x = sorted(set(list_x1) & set(list_x2))
+    except: new_list_x = list(set(list_x1) & set(list_x2))
+    new_list_y1 = []
+    new_list_y2 = []
+    for x in new_list_x:
+        new_list_y1.append(list_y1[list_x1.index(x)])
+        new_list_y2.append(list_y2[list_x2.index(x)])
+    return new_list_x, new_list_y1, new_list_y2
+{% endhighlight %}
