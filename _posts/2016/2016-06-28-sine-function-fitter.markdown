@@ -52,7 +52,7 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
         freq = params['frequency'].value
         off = params['offset'].value
         
-        return amp * np.sin(x * freq  + pshift) + off
+        return amp * np.sin(2* np.pi * x * freq  + pshift) + off
 
     def residual(params, x, data):
         model = sin_function(params, x)
@@ -62,7 +62,7 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
     params.add('amp', value=(y_data_max-y_data_min)/2.)
     params.add('offset', value=y_data_offset)
     params.add('phase', value=0.0, min=-np.pi/2., max=np.pi/2.)
-    params.add('frequency', value=central_frequency, min=0)
+    params.add('frequency', value=central_frequency/(2*np.pi), min=0)
 
     out = lmfit.minimize(residual, params, args=(x_data, y_data))
     
@@ -73,6 +73,7 @@ def fit_sine(x_data, y_data, frequency_grid_size=100, max_min_estimation_size=5,
         ax[0].axvline(central_frequency, c="green") 
         ax[0].set_xlabel("x_data")
         ax[0].set_ylabel("Lomb Scargle spectrum")    
+        ax[0].set_title("Lombfreq [Hz] = "+str(central_frequency[0]/(2*np.pi)))
 
         x_plot = np.linspace(np.min(x_data), np.max(x_data), 100)
         ax[1].scatter(x_data, y_data)
