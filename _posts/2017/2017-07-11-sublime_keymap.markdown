@@ -7,6 +7,22 @@ categories: fast_copy_paste
 
 {% highlight javascript %}
 [
+// Bookmarks
+  { "keys": ["ctrl+space"], "command": "next_bookmark" }, 
+  { "keys": ["ctrl+alt+space"], "command": "toggle_bookmark" },
+  { "keys": ["ctrl+alt+shift+space"], "command": "clear_bookmarks" },
+  { "keys": ["ctrl+alt+shift+."], "command": "select_all_bookmarks" },
+
+// Autocomplete
+{ "keys": ["alt+space"], "command": "auto_complete" },
+{ "keys": ["alt+space"], "command": "replace_completion_with_auto_complete", "context":
+  [
+    { "key": "last_command", "operator": "equal", "operand": "insert_best_completion" },
+    { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+    { "key": "setting.tab_completion", "operator": "equal", "operand": true }
+  ]
+},
+
 // Cursor movements (heavy altgr usage)
   { "keys": ["ctrl+alt+q"], "command": "move_to", "args": {"to": "hardbol"} },
   { "keys": ["ctrl+alt+e"], "command": "move_to", "args": {"to": "hardeol"} },
