@@ -1,0 +1,69 @@
+---
+layout: post
+title:  "Queue, how not to use them"
+date:   2017-07-30 22:00:00 +0100
+categories: python
+---
+
+This is how i used queue to retrieve a response form a function in a different thread. This might be useful when the function in the separate thread talks to an instrument and the response time is unknown. I think there are much better way to do this, but it works...
+
+
+{% highlight python %}
+import functools
+import queue
+import threading
+import time
+from random import randint
+
+@functools.total_ordering
+class Job:
+    def __init__(self, priority, task, response_queue=None):
+        self.priority = priority
+        self.task = task
+        self.response_queue = response_queue
+        return
+    
+    def __eq__(self, other):
+        return self.priority == other.priority
+
+    def __lt__(self, other):
+        return self.priority < other.priority
+
+
+def process_job(task_queue):
+    while True:
+        next_job = task_queue.get()
+        if next_job.response_queue:
+            time.sleep(0.005) # Performing task and put the result in the response queue
+            next_job.response_queue.put(next_job.task)
+        else:
+            time.sleep(0.001) # Performing a task with no response required
+        task_queue.task_done()
+
+
+def put_periodic_job(task_queue):
+    for i in range(10):
+        task_queue.put(Job(priority=1, task=None))
+
+def put_user_job(task_queue):
+    response_queue = queue.Queue()
+    a = randint(1, 100)
+    task_queue.put(Job(priority=1, task=a, response_queue=response_queue))
+    assert a == response_queue.get()
+    response_queue.task_done()
+
+    
+task_queue = queue.PriorityQueue()
+
+workers = [threading.Thread(target=process_job, args=(task_queue,)),
+    threading.Thread(target=put_periodic_job, args=(task_queue,))]
+
+for _ in range(50):
+    workers.append(threading.Thread(target=put_user_job, args=(task_queue,)))
+
+for w in workers:
+    w.setDaemon(True)
+    w.start()
+
+task_queue.join()
+{% endhighlight %}
