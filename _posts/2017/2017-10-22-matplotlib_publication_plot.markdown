@@ -4,7 +4,16 @@ title:  "Publication plot"
 date:   2017-10-22 11:00:00 +0100
 categories: data_analysis
 ---
+{% highlight python %}
+import mplparams
 
+with plt.rc_context(mplparams.single_column):
+    fig = plt.figure(figsize=[s/25.5 for s in (32,28)], dpi=120)  # pdi of the screen
+    ax = fig.add_axes([0,0,1,1]) # set the axes to be the full size of the figure
+    
+
+    fig.savefig(r'test.pdf', bbox_inches="tight")
+{% endhighlight %}
 
 {% highlight python %}
 single_column = {
