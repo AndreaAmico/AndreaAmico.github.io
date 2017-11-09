@@ -4,6 +4,8 @@ title:  "Publication plot"
 date:   2017-10-22 11:00:00 +0100
 categories: data_analysis
 ---
+
+Copy paste script to produce paper sized plots. The input size is expressed in mm (32 x 28 in the example). One can set the pdi of the screen to plot the image with the correct physicsl size. To zoom the image just increase the dpi. The size of the image is referred to the axes only, labels, title and lengend are not included. The `import mplparams` command implies to have in the local path a python file named *mplparams.py* containing the `single_column` dictionary of the second code box below.
 {% highlight python %}
 import mplparams
 
