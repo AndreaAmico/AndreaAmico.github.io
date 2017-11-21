@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Tkinter mouse events"
+title:  "Tkinter mouse events callback"
 date:   2017-07-12 08:30:00 +0100
 categories: python-GUI
 ---
