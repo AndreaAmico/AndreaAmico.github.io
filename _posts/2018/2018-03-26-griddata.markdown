@@ -1,0 +1,59 @@
+---
+layout: post
+title:  "Grid data"
+date:   2018-03-26 09:00:00 +0100
+categories: data_analysis
+---
+
+
+Interpolate 2d data-points to a given coordinate grid. This is useful when a 2d plot is needed but the data points are sparse or the coordinates are not integers values. In order to use it, one needs to build 3+2 arrays, i.e. the x, y, and z (the value) coordinates of the dataset and the grid. They can easily be feeded to the griddata function as follows: `griddata((x,y), z, (grid_x, grid_y))`.
+
+The grid must be 2d and to build it a possible method is to use np.linspace (or any other sequence) and feed the griddata function with `..., (linspace_x[None,:], linspace_y[:,None])`.
+
+
+Griddata returns a 2d array that contains the interpolated value of z corresponding to the grid points.
+
+{% highlight python %}
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from scipy.interpolate import griddata
+import numpy as np
+
+%matplotlib inline
+
+fig, ax = plt.subplots(1, 3, figsize=(10,3.5))
+
+
+yx = np.mgrid[:50, :50]
+z = (np.cos(yx[1]/8)+np.sin(yx[0]/4)+2)/4
+ax[0].imshow(z)
+
+xs, ys, zs = [], [], []
+np.random.seed(42)
+
+for x, y in zip(*np.random.randint(low=0, high=50, size=(2, 200))):
+    xs.append(x)
+    ys.append(y)
+    zs.append(z[y, x])
+
+ax[1].scatter(xs, ys, color=cm.viridis(z[ys, xs]))
+ax[1].set_ylim(50,0)
+
+x_grid = np.linspace(0,50, 20)
+y_grid = np.linspace(0, 50, 20)
+data_in_grid = griddata((xs, ys), zs, (x_grid[None,:], y_grid[:,None]), method='linear')
+
+CS = ax[2].contour(x_grid, y_grid, data_in_grid, 10,
+                    linewidths=0.5, colors='white', alpha=0.5)
+CF = ax[2].contourf(x_grid, y_grid, data_in_grid, 10)
+ax[2].set_ylim(50,0)
+plt.tight_layout()
+{% endhighlight %}
+
+
+
+{% highlight python %}
+
+{% endhighlight %}
+
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/griddata.svg%}
