@@ -2,20 +2,40 @@
 layout: default
 ---
 
-<div class="home">
+<link href="css/portfolio.css" rel="stylesheet" type="text/css">
 
-  <h1 class="page-heading">Posts</h1>
+<div class="home portfolio boxing">
+  <div id="myBtnContainer">
+    <button class="btn active" onclick="filterSelection('all')"> Show all</button>
+    <button class="btn" onclick="filterSelection('general')"> General</button>
+    <button class="btn" onclick="filterSelection('data_analisys')"> Data analisys</button>
+    <button class="btn" onclick="filterSelection('fast_copy_paste')"> Copy paste</button>
+    <button class="btn" onclick="filterSelection('gui')"> Gui</button>
+  </div>
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+  <div class="row">
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
+    <div class="column data_analisys">
+      <div class="content">
+        <a href="data_analysis/2018/03/26/griddata.html">
+          <img src="asset/images/home/griddata.svg" alt="data_analisys" style="width:100%">
+          <h1>Griddata</h1>
+        </a>
+        <p>Lorem ipsum dolor..</p>
+      </div>
+    </div>
+    <div class="column data_analisys">
+      <div class="content">
+        <a href="data_analysis/2018/03/03/fit_wrapper.html">
+          <img src="asset/images/home/fit_wrap.svg" alt="data_analisys" style="width:100%">
+          <h1>Fit wrapper</h1>
+        </a>
+        <p>Lorem ipsum dolor..</p>
+      </div>
+    </div>
+
+  </div>
   
+  <script src="/js/portfolio.js"></script>
+
 </div>
