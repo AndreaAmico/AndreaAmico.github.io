@@ -14,8 +14,12 @@
 }
 
 .portfolio h1 {
-    font-size: 24px;
+    font-size: 20px;
     word-break: break-all;
+}
+
+.portfolio p {
+    font-size: 12px;
 }
 
 .row {
@@ -31,7 +35,7 @@
 /* Create three equal columns that floats next to each other */
 .column {
     float: left;
-    width: 33.33%;
+    width: 30%;
     display: none; /* Hide columns by default */
 }
 
