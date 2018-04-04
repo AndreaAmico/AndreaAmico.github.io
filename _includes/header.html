@@ -1,8 +1,10 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
 <header class="site-head">
 
   <nav class="header-nav">
 
-    <a class="header-button-right" href="/about/">
+    <a class="header-button header-button-right" href="/about/">
 
      <span class="header-icon">{% include _icons/about.svg %}</span>
 
@@ -35,5 +37,19 @@
       {% include _icons/code-pills-title.svg %}
     </div>
   </div>
+
+  <script type="text/javascript">
+
+    $(".header-button").hover(function() {
+
+      $(this).stop().animate({marginTop:"10px"}, 200);
+      
+    }, function() {
+
+      $(this).stop().animate({marginTop:"-10px"}, 200);
+      
+    });
+
+  </script>
 
 </header>
