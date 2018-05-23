@@ -17,8 +17,8 @@ permalink: /topics/
       <li>
         {{post.published}} <a href="{{ post.url }}">{{ post.title }}</a>
       </li>
-    {% endif %}  
-   {% endfor %} 
+    {% endif %}
+   {% endfor %}
   {% endfor %}
 </ul>  
 {% endfor %}

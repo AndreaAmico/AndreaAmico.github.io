@@ -6,13 +6,22 @@ layout: default
 <div class="home portfolio boxing">
   <div id="myBtnContainer">
     <button class="btn active" onclick="filterSelection('all')"> Show all</button>
-    <button class="btn" onclick="filterSelection('general')"> General</button>
     <button class="btn" onclick="filterSelection('data_analysis')"> Data analysis</button>
     <button class="btn" onclick="filterSelection('fast_copy_paste')"> Copy paste</button>
-    <button class="btn" onclick="filterSelection('gui')"> Gui</button>
+    <button class="btn" onclick="filterSelection('other')"> Other</button>
   </div>
+   <div class="row">
 
-  <div class="row">
+    <div class="column other">
+      <div class="content">
+        <a href="other/2018/05/10/pypi_add_package.html">
+          <img src="asset/images/home/pyPI_logo.svg" alt="other" style="width:100%">
+          <h1>Upload to pyPI</h1>
+        </a>
+        <p>Short guide on how to upload a github package to pyPi to be accessible with pip.</p>
+      </div>
+    </div>
+
     <div class="column data_analysis">
       <div class="content">
         <a href="data_analysis/2018/03/26/griddata.html">
@@ -22,6 +31,8 @@ layout: default
         <p>Interpolate 2D data-points to a given coordinate grid.</p>
       </div>
     </div>
+
+
     <div class="column data_analysis">
       <div class="content">
         <a href="data_analysis/2018/03/03/fit_wrapper.html">
@@ -31,13 +42,24 @@ layout: default
         <p>Use the default parameters of the model function to initialize the fit initial guesses and limits.</p>
       </div>
     </div>
+
     <div class="column data_analysis">
       <div class="content">
-        <a href="data_analysis/2016/09/01/2D-gaussian-function-fitter.html">
-          <img src="asset/images/home/gaussian_fit.svg" alt="data_analysis" style="width:100%">
-          <h1>2D gaussian fit</h1>
+        <a href="data_analysis/2018/01/20/from_string.html">
+          <img src="asset/images/home/string_to_array.svg" alt="data_analysis" style="width:100%">
+          <h1>String to array</h1>
         </a>
-        <p>Gaussian function fitter using the lmfit module. The initial guess parameters are not needed.</p>
+        <p>Take a string containing a table and returns the column as numpy arrays.</p>
+      </div>
+    </div>
+
+    <div class="column fast_copy_paste">
+      <div class="content">
+        <a href="fast_copy_paste/2017/11/20/list_sorting.html">
+          <img src="asset/images/home/sort_list.svg" alt="fast_copy_paste" style="width:100%">
+          <h1>Sort lists</h1>
+        </a>
+        <p>Sort more than one list together.</p>
       </div>
     </div>
 
@@ -50,25 +72,16 @@ layout: default
         <p>List of standard data analysis imports and magics.</p>
       </div>
     </div>
+
     <div class="column data_analysis">
       <div class="content">
-        <a href="data_analysis/2018/01/20/from_string.html">
-          <img src="asset/images/home/string_to_array.svg" alt="data_analysis" style="width:100%">
-          <h1>String to array</h1>
+        <a href="data_analysis/2016/09/01/2D-gaussian-function-fitter.html">
+          <img src="asset/images/home/gaussian_fit.svg" alt="data_analysis" style="width:100%">
+          <h1>2D gaussian fit</h1>
         </a>
-        <p>Take a string containing a table and returns the column as numpy arrays.</p>
+        <p>Gaussian function fitter using the lmfit module. The initial guess parameters are not needed.</p>
       </div>
     </div>
-    <div class="column general">
-      <div class="content">
-        <a href="other/2018/05/10/pypi_add_package.html">
-          <img src="asset/images/home/pyPI_logo.svg" alt="other" style="width:100%">
-          <h1>Upload pyPI package</h1>
-        </a>
-        <p>Short guide on how to upload a github package to pyPi to be accessible with pip.</p>
-      </div>
-    </div>
-
 
   </div>
   

@@ -2,7 +2,7 @@
 layout: post
 title:  "Sorting two lists"
 date:   2017-11-20 11:00:00 +0100
-categories: data_analysis
+categories: fast_copy_paste
 ---
 
 Zip plus sorted allows to order two list at once:
