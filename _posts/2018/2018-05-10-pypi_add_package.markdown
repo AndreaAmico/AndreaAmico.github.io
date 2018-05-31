@@ -9,7 +9,7 @@ categories: other
 1. Register on [test.pypi.org](https://test.pypi.org) and [pypi.org](https://pypi.org)
 
 2. Create .pypirc file and put it in ~/.pypirc (or windows10 C:\User\$username$)
-
+(under unix set the right permission "chmod 600 ~/.pypirc")
 __.pypirc__:
 {% highlight Plain Text %}
 [distutils]
@@ -83,7 +83,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 a folder with the package name with a __\_\_init\_\_.py__ file inside.
 
+5. Upload everything on github (with a tag):
+{% highlight Plain Text %}
+git tag 0.0.1 -m "Here are my updates"
+{% endhighlight %}
+
+{% highlight Plain Text %}
+git push --tags origin master
+{% endhighlight %}
 
 
-4. run: python setup.py sdist upload -r pypitest
-5. run: python setup.py sdist upload -r pypi
+6. run: python setup.py sdist upload -r pypitest
+7. run: python setup.py sdist upload -r pypi
