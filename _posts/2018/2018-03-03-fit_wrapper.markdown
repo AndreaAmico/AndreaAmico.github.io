@@ -1,350 +1,145 @@
 ---
 layout: post
-title:  "Fit wrapper"
+title:  "fitwrap module"
 date:   2018-03-03 11:00:00 +0100
 categories: data_analysis
 ---
 
-
-{% highlight python %}
-from collections import OrderedDict, Sized
-from scipy.linalg import solve_triangular
-from scipy.linalg import svd
-from scipy.stats import t as scipy_stats_t
-
-import inspect
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.optimize
-
-
-class fit(object):
-    ''' Fitting wrapper to use the default parameters of the function to initialize the fit parameters.
-
-    With defaults it uses the scipy.optimize.curve_fit function as fitting method. The fit variables are
-    all the function parameters except for the first argument, that is the x variable and the last one
-    if its name is fixed_args. In the latter case, all the variable contained in the fixed_args tuple
-    are considered fixed parameters, and they are not considered by the fitting method.
-    '''
-    def __init__(self, function, xdata, ydata,
-        print_results = True,
-        plot_results = True,
-        fitting_function = scipy.optimize.curve_fit,
-        plotting_function = False,
-        plot_range_x = False,
-        plot_range_y = False,
-        fig_ax = False,
-        debug = False,
-        **kwargs):
-
-        ''' Fitting method wrapper (scipy.optimize.curve_fit if the default)
-
-        Args:
-        function (func): Fit function model.
-        xdata (iterable): x data set.
-        ydata (iterable): y data set.
-        print_results (bool): print the fit results.
-        plot_results (bool): plot the fit result using the method plotting_function
-        fitting_function (func): fit function, default is scipy.optimize.curve_fit. {f=self.clean_function,
-            xdata=self.xdata, ydata=self.ydata, p0=self.variable_values, **kwargs} will be passed as arguments
-            to the fitting_function.
-        plotting_function: plotting function method that take {self.clean_function, self.val,
-            self.xdata, self.ydata, **self.kwargs} as arguments. If False, a default plotting function will be used.
-        plot_range_x (2 sized iterable): x limits for the plot
-        plot_range_y (2 sized iterable): y limits for the plot
-        fig_ax (matplotlib.pyplot figure, matplotlib.pyplot axes): axex and figures where the plot will be placed,
-            if False, a new figure and axes will be created.
-        debug (bool): If True the plot function will produce 4 axes showing seperately the data points, the fit model
-            with the initial guess, the fit model with the initial guess plus the data points and the fit result plus
-            the data points.
-        '''
-
-        self.function = function
-        self.xdata = np.array(xdata)
-        self.ydata = np.array(ydata)
-        self.plot_range_x = plot_range_x
-        self.plot_range_y = plot_range_y
-        self.fig_ax = fig_ax
-        self.kwargs = kwargs
-        self.params = OrderedDict()
-
-        if plotting_function:
-            self.plotting_function = plotting_function
-        elif debug:
-            self.plotting_function = self._plotting_debug
-        else:
-            self.plotting_function = self._plotting_function
-
-
-        self.fit_plot_params = {
-            'FILL_BETWEEN_COLOR' : [x/255 for x in (223, 180, 175)],
-            'BACKGROUND_COLOR' : [x/255 for x in (254, 251, 243, 255)],
-            'MARKER_COLOR' : (0.35,0.77,0.55),
-            'BASE_COLOR' : 'brown',
-            'LINEWIDTH' : 1.5,
-            'PLOT_POINTS' : 100,
-            'FIGSIZE' : (8,5),
-            'PADDING' : 0.1,
-            'MARKER' : 'o',
-            'MARKEREDGEWIDTH_BIG' : 0.8,
-            'MARKEREDGEWIDTH_SMALL' : 0.6,
-            'MARKERSIZE_BIG' : 7,
-            'MARKERSIZE_SMALL' : 4,
-            'NUM_POINT_LIMIT' : 100,
-            'GRID' : True,
-            'GRID_LINEWIDTH' : 0.5,
-            'GRID_STYLE' : ':'}
-
-        self._calculate_function_parameters()   #parse the function parameters to extract self.parameters_index, 
-                                                #self.function_parameters, self.fixed_values, self.fixed_index,
-                                                #self.variable_values, self.variable_index, self.fixed_args_name
-                                                #self.bounds, self.is_bounded
-
-        self.clean_function = self._wrap_function() #wrap function to remove the fixed parameters from the argument
-        
-        if self.is_bounded:
-            out = fitting_function(f=self.clean_function, xdata=self.xdata, ydata=self.ydata,
-                p0=self.variable_values, bounds=list(zip(*self.bounds)), **kwargs)
-        else:
-            out = fitting_function(f=self.clean_function, xdata=self.xdata, ydata=self.ydata,
-                p0=self.variable_values, **kwargs)
-
-        self.val, self.cov = out
-        self.err = np.sqrt((np.diag(self.cov)))
-
-        self._save_fitted_parameters()
-
-        if plot_results:
-            self._plot_results()
-        if print_results:
-            self._print_results()
-        
-    def _get_first_item(self, variable):
-        if isinstance(variable, Sized):
-            return variable[0]
-        else:
-            return variable
-
-    def _wrap_function(self):
-        new_args = [0]*len(self.parameters_index)
-        def new_function(x, *args):
-            for value, index in zip(args+tuple(self.fixed_values), self.parameters_index):
-                new_args[index] = value
-            return self.function(x, *new_args)
-        return new_function
-
-    def _save_fitted_parameters(self):
-        class dotdict(OrderedDict):
-            __getattr__ = dict.get
-            __setattr__ = dict.__setitem__
-            __delattr__ = dict.__delitem__
-
-        out_value = iter(self.val)
-        out_err = iter(self.err)
-        max_name_length = max([len(name) for name in self.function_parameters])
-
-        for name in self.function_parameters:
-            self.params[name] = dotdict()
-            if name in self.fixed_args_name:
-                self.params[name]['val'] = self.function_parameters[name].default
-                self.params[name]['err'] = 0
-            else:
-                self.params[name]['val'] = next(out_value)
-                self.params[name]['err'] = next(out_err)
-        return None
-
-    def _calculate_function_parameters(self):
-        self.function_parameters = OrderedDict(inspect.signature(self.function).parameters)
-        self.fixed_values, self.fixed_index = [], []
-        self.variable_values, self.variable_index  = [], []
-        self.bounds, self.is_bounded = [], False
-
-        self.function_parameters.popitem(last=False) #remove x
-        if tuple(self.function_parameters.items())[-1][0]=='fixed_args': #check for fixed arguments
-            self.fixed_args_name = self.function_parameters['fixed_args'].default
-            self.function_parameters.popitem(last=True)
-        else:
-            self.fixed_args_name = []
-
-        for index, param in enumerate(self.function_parameters):
-            current_param = self.function_parameters[param]
-
-            if current_param.name in self.fixed_args_name:
-                self.fixed_index.append(index)
-                self.fixed_values.append(self._get_first_item(current_param.default))
-            else:          
-                if current_param.default == inspect._empty:
-                    value = 1
-                    bound = [-np.inf, np.inf]
-                elif isinstance(current_param.default, Sized):
-                    value = current_param.default[0]
-                    bound = [current_param.default[1], current_param.default[2]]
-                    is_bounded = True
-                else:
-                    value = current_param.default
-                    bound = [-np.inf, np.inf]
-
-                self.bounds.append(bound)
-                self.variable_index.append(index)
-                self.variable_values.append(value)
-
-        self.parameters_index = self.variable_index + self.fixed_index
-
-
-    def _confidence_interval(self, x, confidence_probability=0.95): 
-        grad_array = np.zeros(len(self.val))
-        sqrt_machine_precision = np.sqrt(np.finfo(type(1.0)).eps)
-
-        for index, _ in enumerate(self.val):
-            start_param = self.val.copy()
-            end_param = self.val.copy()
-            start_param[index] = start_param[index] + sqrt_machine_precision
-            end_param[index] = end_param[index] - sqrt_machine_precision
-            grad_array[index] = (self.clean_function(x, *end_param)-self.clean_function(x, *start_param))/(2*sqrt_machine_precision)
-
-        # Student's t distribution
-        nfree = self.xdata.shape[0] - len(self.val)
-        t = np.abs(scipy_stats_t.ppf(1-confidence_probability, nfree))
-
-        # Confidence interal estimation: grad(fun)_all_param.T * covariance_matrix * grad(fun)_all_param
-        # reduced chi squared is considered to be 1
-        return np.sqrt(np.dot(np.dot(self.cov, grad_array), grad_array)) * t
-
-    def round_sig(self, val, err, significative_digits=3):
-        if err == 0:
-            return (val, 0)
-        return (round(val, significative_digits-int(np.floor(np.log10(abs(err))))-1),
-                round(err, significative_digits-int(np.floor(np.log10(abs(err))))-1))
-
-    def _print_results(self):
-        out_value = iter(self.val)
-        out_err = iter(self.err)
-        max_name_length = max([len(name) for name in self.function_parameters])
-
-        for name in self.function_parameters:
-            if name in self.fixed_args_name:
-                print('{name:>{name_length}}:  {default:<7} Fixed'.format(name=name,
-                    name_length=max_name_length, default=self.function_parameters[name].default))
-            else:
-                initial = (1 if self.function_parameters[name].default == inspect._empty else self.function_parameters[name].default)
-                val, err = self.round_sig(next(out_value), next(out_err))
-                print('{name:>{name_length}}:  {val:<7} +/- {err:<7} {perc_err:>9}  initial:{initial}'.format(name=name,
-                    name_length=max_name_length,  val=val, err=err, perc_err='({:.1f}%)'.format(err/val*100), initial=initial))
-        return None
-
-    def _set_plot_range(self):
-        if not self.plot_range_x:
-            x_min, x_max = np.min(self.xdata), np.max(self.xdata)
-            self.plot_range_x = (x_min - (x_max - x_min)*self.fit_plot_params['PADDING'],
-                x_max + (x_max - x_min)*self.fit_plot_params['PADDING'])
-        if not self.plot_range_y:
-            y_min, y_max = np.min(self.ydata), np.max(self.ydata)
-            self.plot_range_y = (y_min - (y_max - y_min)*self.fit_plot_params['PADDING'],
-                y_max + (y_max - y_min)*self.fit_plot_params['PADDING']) 
-
-    def _plotting_function(self, *args, **kwargs):
-        if self.fig_ax:
-            fig, ax = self.fig_ax
-        else:
-            fig, ax = plt.subplots(figsize=self.fit_plot_params['FIGSIZE'])
-
-        self._set_plot_range()
-        ax.set_xlim(self.plot_range_x)
-        ax.set_ylim(self.plot_range_y)
-        
-        x_plot = np.linspace(*self.plot_range_x, num=self.fit_plot_params['PLOT_POINTS'])
-        y_plot =  self.clean_function(x_plot, *self.val)
-        ax.plot(x_plot,  y_plot, c=self.fit_plot_params['BASE_COLOR'], linewidth=self.fit_plot_params['LINEWIDTH'])
-        
-        # Plot 95% confidence interval
-        y_error = np.array([self._confidence_interval(x, confidence_probability=0.95) for x in x_plot])
-        ax.fill_between(x_plot, y_plot-y_error, y_plot+y_error, interpolate=True, color=self.fit_plot_params['FILL_BETWEEN_COLOR'])
-        
-        # Plot datapoints
-        if 'sigma' in kwargs:
-            ax.errorbar(self.xdata, self.ydata, kwargs['sigma'], linestyle='None', color=self.fit_plot_params['BASE_COLOR'] )
-
-        ax.plot(self.xdata, self.ydata, linestyle='None',marker=self.fit_plot_params['MARKER'], mfc=self.fit_plot_params['MARKER_COLOR'], mec=self.fit_plot_params['BASE_COLOR'],
-                 markersize = self.fit_plot_params['MARKERSIZE_BIG'] if self.xdata.shape[0]<100 else self.fit_plot_params['MARKERSIZE_SMALL'],
-                 markeredgewidth = self.fit_plot_params['MARKEREDGEWIDTH_BIG'] if self.xdata.shape[0]<self.fit_plot_params['NUM_POINT_LIMIT'] else self.fit_plot_params['MARKEREDGEWIDTH_SMALL'])
-
-        fig.patch.set_facecolor(self.fit_plot_params['BACKGROUND_COLOR'])
-        ax.set_facecolor(self.fit_plot_params['BACKGROUND_COLOR'])
-        ax.grid(b=self.fit_plot_params['GRID'], linestyle=self.fit_plot_params['GRID_STYLE'], linewidth=self.fit_plot_params['GRID_LINEWIDTH'])
-
-    def _plotting_debug(self, *args, **kwargs):
-        fig, axs = plt.subplots(2, 2, figsize=(self.fit_plot_params['FIGSIZE'][0], self.fit_plot_params['FIGSIZE'][1]))
-        self._set_plot_range()
-
-        x_plot = np.linspace(*self.plot_range_x, num=self.fit_plot_params['PLOT_POINTS'])
-        y_plot =  self.clean_function(x_plot, *self.val)
-        y_plot_p0 =  self.clean_function(x_plot, *self.variable_values)
-        if 'sigma' in kwargs:
-            axs[0, 0].errorbar(self.xdata, self.ydata, yerr=kwargs['sigma'], linestyle='None', color='red')
-            axs[1, 0].errorbar(self.xdata, self.ydata, yerr=kwargs['sigma'], linestyle='None', color='red')
-            axs[1, 1].errorbar(self.xdata, self.ydata, yerr=kwargs['sigma'], linestyle='None', color='red')
-        axs[0, 0].scatter(self.xdata, self.ydata, label='data', color='purple')
-        axs[1, 0].scatter(self.xdata, self.ydata, label='data', color='purple')
-        axs[1, 1].scatter(self.xdata, self.ydata, label='data', color='purple')
-
-        axs[0, 1].plot(x_plot, y_plot_p0, label='initial guess', color='green')
-        axs[1, 0].plot(x_plot, y_plot_p0, label='initial guess', color='green')
-        axs[1, 1].plot(x_plot, y_plot, label='fit result', color='orange')
-        axs[1, 1].set_xlim(np.min(self.xdata), np.max(self.xdata))
-        axs[1, 1].set_ylim(np.min(self.ydata), np.max(self.ydata))
-
-        [[ax.legend() for ax in v_ax] for v_ax in axs]
-
-    def _plot_results(self):
-        self.plotting_function(self.clean_function, self.val, self.xdata, self.ydata, **self.kwargs)
-
-
-if __name__ == '__main__':
-    def f(x, a=-1, b=6 , c=0.5, d=3):
-        return a + b*x + c*x**2 + d*x**3
-
-    xx = np.linspace(-1, 1, 50)
-    yy = f(xx)+(np.random.random(xx.shape[0])-0.5)*2
-    y_errs = (np.random.random(xx.shape[0])-0.5)*2
-
-    def g(x, a, b=6 , c=0.5, d=3, fixed_args=['b']):
-        return a + b*x + c*x**2 + d*x**3
-
-    def my_plot(f, p0, x, y):
-        xx = np.linspace(0,3, 30)
-        yy = f(xx, *p0)
-        plt.scatter(x, y)
-        plt.plot(xx, yy, color='red')
-
-    fit(g, xx, yy, debug=True, sigma=y_errs) # plot debug mode
-    plt.show()
-
-    fit(g, xx, yy, plotting_function=my_plot) # plot with custom function
-    plt.show()
-
-    fit(g, xx, yy) # default plot
-    plt.show()
+The fitwrap module is available on [github](https://github.com/AndreaAmico/fitwrap "https://github.com/AndreaAmico/fitwrap") and can be installed via pip:
+{% highlight console %}
+pip install fitwrap
 {% endhighlight %}
 
+This module provides a wrapper for the [scipy](https://www.scipy.org/ "https://www.scipy.org/") function `optimize.curve_fit()`. The full fitting procedure is reduced in one-line command, moreover the initial fitting parameters and boudaries are set by the keyword arguments of the model fitting function. The package comes with the following functions:
+- `fit`: non linear 1D fit
+- `fit2d`: non linear 2D fit
+- `fit_sin`: sinusoidal fit with automatic fit funnction and initial guess.
 
-
+Here are some usage example:
 {% highlight python %}
-import matplotlib.pyplot as plt
+import fitwrap as fw
 import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
 
-def fit_fun(x, off=0.2, amp=(0, 3, 1), x0=8, sigma=1, fixed_args='sigma'):
-    return off + amp*np.exp(-(x-x0)**2/(2*sigma**2))
+def model_function(x, off=4, m=(1.2, 1, 2), b=3.3, fixed_args=['off']):
+    return off + m*x + b*x**2
 
-fig, ax = plt.subplots(1, 2, figsize=(10,4))
 np.random.seed(42)
-x = (np.random.random(23)+0.5) * 10
-y = fit_fun(x, off=0.3, amp=1, x0=8, sigma=1) + (np.random.random(x.shape[0])-0.5)*.2
-y_err_off = 1/y *0.05
-y_err_amp = y *0.05
-out = fw.fit(fit_fun, x, y, sigma=y_err_off,  fig_ax=(fig, ax[0]))
-print('-'*60)
-out = fw.fit(fit_fun, x, y, sigma=y_err_amp,  fig_ax=(fig, ax[1]))
+x = np.random.random(50) - 0.5
+y = model_function(x, off=3.3, m=3, b=15) + np.random.random(x.shape[0]) - 0.5
+
+fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(12, 4))
+fw.fit(model_function, x, y, fig_ax=[fig, ax1])
+
+def model_function2(x, off=1, m=1, b=1):
+    return off + m*x + b*x**2
+fw.fit(model_function2, x, y, fig_ax=[fig, ax2], print_results=False);
+{% endhighlight %}
+off:  4       Fixed<br>
+  m:  2.0     +/- 0.305     (15.2%)  initial:(1.2, 1, 2)<br>
+  b:  9.404   +/- 0.789      (8.4%)  initial:3.3
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/parabola.svg%}
+------------
+{% highlight python %}
+import fitwrap as fw
+import matplotlib.pyplot as plt
+import numpy as np
+%matplotlib inline
+
+def my_signal(t, off, amp, freq, phase):
+    return  off + amp * np.sin(2*np.pi*freq*t + phase)
+
+NOISE_LEVEL = 2
+np.random.seed(42)
+times = np.random.random(100)
+signals = my_signal(times, 0.5, 2, 4, np.pi/4) + (np.random.random(times.shape)-0.5)*NOISE_LEVEL
+errors = np.abs(my_signal(times, 0, 1, 4, np.pi/2))/2+0.01
+
+fw.fit_sin(times, signals, sigma=errors)
 
 {% endhighlight %}
+Fitting function model: y = off + amp * sin(2 * pi * freq * x + phase)<br>
+  off:  0.5493  +/- 0.0661    (12.0%)  initial:0.6485271451564831<br>
+  amp:  1.969   +/- 0.222     (11.3%)  initial:4.236288465011205<br>
+ freq:  3.9981  +/- 0.026      (0.7%)  initial:4.043991443019413<br>
+phase:  0.73    +/- 0.149     (20.4%)  initial:0.39269908169872414
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/sine.svg%}
 
-{% include _images/{{ page.date | date: '%Y-%m-%d'}}/fit_wrap.svg%}
+-----------
+
+{% highlight python %}
+import fitwrap as fw
+import matplotlib.pyplot as plt
+import numpy as np
+%matplotlib inline
+
+def g2(yx, x0=21, y0=32, sx=8, sy=5):
+    return np.exp(-(yx[1]-x0)**2/(2*sx**2) -(yx[0]-y0)**2/(2*sy**2))
+    
+yx = np.mgrid[:100,:40]
+gg = g2(yx, 20, 30, 5, 5)+(0.5-np.random.random(yx[0].shape))*0.2
+
+fw.fit2d(g2, yx, gg, x_rescale=2, y_rescale=0.5)
+{% endhighlight %}
+x0:  20.0004 +/- 0.0459     (0.2%)  initial:21<br>
+y0:  30.0435 +/- 0.0455     (0.2%)  initial:32<br>
+sx:  5.0078  +/- 0.0398     (0.8%)  initial:8<br>
+sy:  4.9602  +/- 0.0394     (0.8%)  initial:5
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/gauss2d.svg%}
+
+---------------
+
+{% highlight python %}
+import fitwrap as fw
+import matplotlib.pyplot as plt
+import numpy as np
+%matplotlib inline
+
+def chirped(t, off, amp, freq, phase):
+    return  off + amp * np.sin(2*np.pi*(freq + t*4)*t + phase)
+
+def chirped2(t, off, amp, freq, phase):
+    return  off + amp * np.sin(2*np.pi*(freq)*t + phase)
+
+NOISE_LEVEL = 0.2
+xx = np.random.random(3000)
+yy = chirped(xx, 0.5, 2, 6, np.pi*0) + (np.random.random(xx.shape)-0.5)*NOISE_LEVEL
+yy = yy + chirped2(xx, 0.5, 2, 20, 2)
+
+
+xmin = np.min(xx)
+xmax = np.max(xx)
+span = 0.2
+n_bins = 40
+x_bins = np.linspace(xmin+span, xmax-span, n_bins)
+
+freq_1d, lomb_spectrum_1d = fw.lomb_spectrum(xx, yy, frequency_span=[1,30], grid_size=1000)
+
+spectrogram = np.zeros([1000, n_bins])
+
+for index, x_bin in enumerate(x_bins):
+    mask = np.logical_and((x_bin-span)<=xx, (x_bin+span)>=xx) 
+    frequency_grid, lombscargle_spectrum = fw.lomb_spectrum(xx[mask], yy[mask],
+                                                            frequency_span=[1,30], grid_size=1000)
+    spectrogram[:, index] = lombscargle_spectrum
+
+
+fig, [ax1, ax2, ax3] = plt.subplots(1,3, figsize=(12,3))
+ax1.plot(*zip(*sorted(zip(xx, yy), key=lambda x: x[0])))
+ax2.plot(freq_1d, lomb_spectrum_1d)
+ax3.imshow(spectrogram, aspect='auto', extent=[x_bins[0],x_bins[-1],
+            frequency_grid[0],frequency_grid[-1]], origin='lower') 
+{% endhighlight %}
+{% include _images/{{ page.date | date: '%Y-%m-%d'}}/lomb.svg%}
+
+
+
+
+
+
+
+
+
+
+
