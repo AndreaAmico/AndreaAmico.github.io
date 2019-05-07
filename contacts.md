@@ -16,9 +16,10 @@ ____
 
 
 **Workplace:**<br>
-<a href="http://www.lens.unifi.it/">LENS</a> - European Laboratory for Non-Linear Spectroscopy / University of Florence<br>
-Via Nello Carrara 1 - 50019 Sesto Fiorentino (Firenze) - Italia<br>
-Lab 46 - tel. +39 055 457 2458
+<a href="https://www.plansoft.it/">PlanSoft s.r.l.</a><br>
+Via Ippolito Rosellini, 25 - 50127 - Firenze (FI) - Italia<br>
+<a href="andrea.amico@plansoft.it">andrea.amico@plansoft.it</a>
+
 <br><br>
 
 ____
