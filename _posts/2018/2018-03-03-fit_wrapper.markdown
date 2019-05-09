@@ -5,42 +5,190 @@ date:   2018-03-03 11:00:00 +0100
 categories: data_analysis
 ---
 
+
+### How to install
+
 The fitwrap module is available on [github](https://github.com/AndreaAmico/fitwrap "https://github.com/AndreaAmico/fitwrap") and can be installed via pip:
 {% highlight console %}
 pip install fitwrap
 {% endhighlight %}
 
-This module provides a wrapper for the [scipy](https://www.scipy.org/ "https://www.scipy.org/") function `optimize.curve_fit()`. The full fitting procedure is reduced in one-line command, moreover the initial fitting parameters and boudaries are set by the keyword arguments of the model fitting function. The package comes with the following functions:
+This module provides a wrapper for the [scipy](https://www.scipy.org/ "https://www.scipy.org/") function `optimize.curve_fit()`. The full fitting procedure is reduced in one-line command, moreover the initial fitting parameters and boundaries are set by the keyword arguments of the model fitting function. The package comes with the following functions:
 - `fit`: non linear 1D fit
 - `fit2d`: non linear 2D fit
-- `fit_sin`: sinusoidal fit with automatic fit funnction and initial guess.
+- `fit_sin`: sinusoidal fit with automatic fit function and initial guess.
 
-Here are some usage example:
-{% highlight python %}
-import fitwrap as fw
-import numpy as np
+-------
+
+## Usage examples
+Import the dependencies we need:
+```python
 import matplotlib.pyplot as plt
-%matplotlib inline
+import numpy as np
+import fitwrap as fw
+```
 
-def model_function(x, off=4, m=(1.2, 1, 2), b=3.3, fixed_args=['off']):
-    return off + m*x + b*x**2
+### Simple fit
+Lets start with a simple fit of a parabolic function.
 
+#### Generate data with black box function
+```python
 np.random.seed(42)
-x = np.random.random(50) - 0.5
-y = model_function(x, off=3.3, m=3, b=15) + np.random.random(x.shape[0]) - 0.5
+xx = np.linspace(-2,10, 30)
+yy = 0.1*(xx-5)**2 + 0.5*(xx-5) + np.random.normal(size=xx.shape)*0.5
 
-fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(12, 4))
-fw.fit(model_function, x, y, fig_ax=[fig, ax1])
+fig = plt.figure(figsize=(5,3))
+ax = fig.add_subplot(111, xlabel="x", ylabel="y")
+ax.scatter(xx, yy)
+#fig.savefig('img/simple_data.svg')
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/simple_data.svg" alt="simple data" width="450"></p>
 
-def model_function2(x, off=1, m=1, b=1):
-    return off + m*x + b*x**2
-fw.fit(model_function2, x, y, fig_ax=[fig, ax2], print_results=False);
-{% endhighlight %}
-off:  4       Fixed<br>
-  m:  2.0     +/- 0.305     (15.2%)  initial:(1.2, 1, 2)<br>
-  b:  9.404   +/- 0.789      (8.4%)  initial:3.3
-{% include _images/{{ page.date | date: '%Y-%m-%d'}}/parabola.svg%}
+
+#### Define model function and fit
+The first variable of the model function is the independent variable (in our case `x`). The following arguments will be used as fit parameters and will be initialized to 1 is not specified.
+
+To fit the data with the model function it is sufficient to call the **fit** method: `fw.fit(model_function, xx, yy)`.
+
+The function will print the fit results, specifying the best fitted value, the absolute error, the relative error and the initial guess for each of the fit parameters. It will plot the **input data** in green, the **best fit curve** and the **confidence interval** corresponding to the confidence probability of 0.95.
+
+```python
+def model_function(x, x0, a2, a1):
+    return a2*(x-x0)**2 + a1*(x-x0)
+
+fit_out = fw.fit(model_function, xx, yy)
+```
+
+```text
+x0:  0.18    +/- 0.191    (106.1%)  initial:1
+a2:  0.11061 +/- 0.00668    (6.0%)  initial:1
+a1:  -0.5875 +/- 0.0555    (-9.4%)  initial:1
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/simple_fit.svg" alt="simple fit" width="550"></p>
+
+
+#### Initial guess for the fitting parameters
+In order to set an initial guess for the initial parameters, pass the initial guess as default parameters in the model function. Keep in mind to place the initial guess to the **most right** arguments of the model function.
+```python
+# Good
+def model_function(x, x0, a2=0.5, a1=0.2):
+    return a2*(x-x0)**2 + a1*(x-x0)
+
+# Syntax Error
+def model_function(x, x0=3, a2=0.5, a1):
+    return a2*(x-x0)**2 + a1*(x-x0)
+```
+```text
+  File "<ipython-input-130-3f5a2423c6cd>", line 6
+    def model_function(x, x0=3, a2=0.5, a1):
+                      ^
+SyntaxError: non-default argument follows default argument
+```
+
+
+## Fixed arguments
+It is possible to fix an agument to exclude it from the fitting parameters using the special keyword **fixed_args**. Set it as the last parameter of the model function and pass the list of the name of the fitting parameters you want to fix.
+
+#### Generate a new black box model
+```python
+np.random.seed(42)
+t_decay = np.linspace(0,20, 30)
+y_decay = 0.1 + np.exp(-t_decay/2) + np.random.normal(size=t_decay.shape)*0.02
+
+fig = plt.figure(figsize=(5,3))
+ax = fig.add_subplot(111, xlabel="time", ylabel="y")
+ax.scatter(t_decay, y_decay)
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/simple_decay.svg" alt="simple decay" width="450"></p>
+
+
+Lets define the model function by fixing the offset of the exponential decay to 0. We expect the fit to be bad since our black box model has an offset of `0.1`.
+
+```python
+def model_function(t, off=0, tau=5, amp=1, fixed_args=['off']):
+    return off + amp*np.exp(-t/tau)
+
+fit_out_fixed = fw.fit(model_function, t_decay, y_decay)
+```
+```text
+off:  0       Fixed
+tau:  3.055   +/- 0.247      (8.1%)  initial:5
+amp:  1.0271  +/- 0.0527     (5.1%)  initial:1
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/fixed_offset.svg" alt="fixed offset" width="550"></p>
+
+
+## Bounded parameters
+
+To fix the boundaries of a fitting parameter one can set its default value in the model definition as the tuple:
+**(initial guess, lower bound, upper bound)**
+
+Lets set the offset to be bounded between `0.2` and `0.5`. We expect again the fit function to fail.
+```python
+def model_function(t, off=(0.4, 0.2, 0.5), tau=5, amp=1):
+    return off + amp*np.exp(-t/tau)
+
+fit_out_bound = fw.fit(model_function, t_decay, y_decay)
+```
+```text
+off:  0.2     +/- 0.0207    (10.3%)  initial:(0.4, 0.2, 0.5)
+tau:  1.505   +/- 0.27      (17.9%)  initial:5
+amp:  0.9371  +/- 0.0882     (9.4%)  initial:1
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/bounded_offset.svg" alt="bounded offset" width="550"></p>
+
+
+
+## Consider errors on data points
+It is possible to consider errors on the `y` variable by passing an array of sigmas to the fit function.
+
+#### Generate a new black box model
+Let us now consider two different types of errors: amplitude error (left plot) and offset error (right plot).
+```python
+np.random.seed(42)
+t_decay = np.linspace(0,10, 30)
+y_decay = 0.1 + np.exp(-t_decay/2) + np.random.normal(size=t_decay.shape)*0.03
+y_decay_err_1 =  (0.01 + np.exp(-t_decay/2))/2
+y_decay_err_2 =  1/(y_decay_err_1*1e3)
+
+
+fig = plt.figure(figsize=(10,3))
+ax1 = fig.add_subplot(121, xlabel="time", ylabel="y")
+ax1.errorbar(t_decay, y_decay, y_decay_err_1, fmt='o')
+
+ax2 = fig.add_subplot(122, xlabel="time", ylabel="y")
+ax2.errorbar(t_decay, y_decay, y_decay_err_2, fmt='o')
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/simple_decay_err.svg" alt="decay err data" width="1000"></p>
+
+
+
+Lets fit the two datasets including the different errors.
+
+```python
+def model_function(t, off=0.1, tau=5, amp=1):
+    return off + amp*np.exp(-t/tau)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,3))
+
+print('Error on amplitude:')
+fit_out_err_1 = fw.fit(model_function, t_decay, y_decay, 
+         sigma=y_decay_err_1, fig_ax=(fig, ax1))
+
+print('\nError on offset:')
+fit_out_err_2 = fw.fit(model_function, t_decay, y_decay,
+        sigma=y_decay_err_2, fig_ax=(fig, ax2))
+```
+<p style="text-align:center;"><img src="/asset/images/fitwrap/decay_errors.svg" alt="decay err" width="1000"></p>
+
+
+
 ------------
+
+
+
+## Example of automatic sinusoidal fit
+
 {% highlight python %}
 import fitwrap as fw
 import matplotlib.pyplot as plt
@@ -66,7 +214,10 @@ Fitting function model: y = off + amp * sin(2 * pi * freq * x + phase)<br>
 phase:  0.73    +/- 0.149     (20.4%)  initial:0.39269908169872414
 {% include _images/{{ page.date | date: '%Y-%m-%d'}}/sine.svg%}
 
+
 -----------
+
+## Example of 2D fit
 
 {% highlight python %}
 import fitwrap as fw
@@ -89,6 +240,8 @@ sy:  4.9602  +/- 0.0394     (0.8%)  initial:5
 {% include _images/{{ page.date | date: '%Y-%m-%d'}}/gauss2d.svg%}
 
 ---------------
+
+## Example of lomb spectrum
 
 {% highlight python %}
 import fitwrap as fw
