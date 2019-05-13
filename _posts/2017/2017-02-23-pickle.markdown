@@ -11,15 +11,14 @@ Use example of [pickle](https://docs.python.org/3/library/pickle.html "https://d
 To store `data_to_save` in `"my_file.pkl"` just:
 {% highlight python %}
 import pickle
-output_file = open(file="my_file.pkl", mode='wb')
-pickle.dump(data_to_save, output_file)
-output_file.close()
+with open("my_file.pkl", 'wb') as output_file:
+	pickle.dump(data_to_save, output_file)
 {% endhighlight %}
 
 To load from the pickle file:
 {% highlight python %}
 import pickle
-pkl_file = open(file="my_file.pkl", mode='rb')
-my_loaded_data = pickle.load(pkl_file)
-pkl_file.close()
+
+with open("my_file.pkl", 'rb') as pkl_file:
+	my_loaded_data = pickle.load(pkl_file)
 {% endhighlight %}
