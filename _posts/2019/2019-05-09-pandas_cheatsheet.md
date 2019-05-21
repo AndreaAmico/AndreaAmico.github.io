@@ -62,6 +62,8 @@ df.sort_index(ascending=True, axis=1) # sort columns indexes
 
 df.set_index(['id', 'name']) # hierarchical indexing
 df.loc[(2, 'bob')] # access hierarchical indexing
+df.iloc[2] # indexing by column number
+
 ```
 
 ### Selection
@@ -80,6 +82,7 @@ df[['name','id']].sort_values(ascending=[False,True], by=['id', 'name'])
 df.isnull()
 df.dropna() # drops entire rows in which one or more values are missing (how='all' if all the fields are missing)
 df.fillna({'id': 0, 'name': 'unknown'}) # or just df.fillna(-999) or by interpolation method='bfill'
+df.['age'].fillna(df.['age'].mean(skipna=True), inplace=True) # fix a signle column
 ```
 
 
