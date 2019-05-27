@@ -1,18 +1,22 @@
 ---
 layout: post
 title:  "Pandas cheat sheet"
-date:   2019-05-09 23:00:00 +0100
+date:   2019-05-09 22:00:00 +0100
 categories: data_analysis
 ---
 
-### Series (ordered key value store + numpy operations)
-```python
-s = pd.Series([7.8, 19.3, 7.8, 10.5])
-s = pd.Series(data=[7.8, 19.3, 7.8, 10.5], index=['bronze', 'gold', 'iron', 'silver']) #s.index=[...] to reset
-s = pd.Series({'bronze':7.8, 'gold':19.3}) #index=['gold', 'silver'] -> drop 'bronze' and assigns NaN to silver
-```
+
 
 ### DataFrame
+{% include _html/menu_pandas_.html %}
+```python
+## SERIES
+s = pd.Series([7.8, 19.3, 7.8, 10.5])
+s = pd.Series(data=[7.8, 19.3, 7.8], index=['bronze', 'gold', 'iron'])
+s = pd.Series({'bronze':7.8, 'gold':19.3})
+#index=['gold', 'silver'] -> drop 'bronze' and assigns NaN to silver
+```
+
 ```python
 df = pd.DataFrame({'val':[10, 20, 30, 40],
                    'patient_id':[1, 2, 3, 4],
@@ -26,6 +30,8 @@ x = df[['name']].copy() # get column as pd.DataFrame (as a copy)
 x = df.loc[0] # get first row as pd.Series (as a poiter)
 x = df.values # get all the DataFrame as a simple numpy array
 
+df.apply(np.median, axis='columns') # or 'rows'
+
 df.shape # -> (4, 3) : (number of rows, number of columns)
 df.head(2), df.tail(3) # get head or tail
 
@@ -37,12 +43,14 @@ df.drop([1], axis=0, inplace=True) # drop row
 ```
 
 ### Load data
+{% include _html/menu_pandas_.html %}
 ```python
 pd.read_csv('f.csv', header=None) # default header is 0, 
 pd.read_csv('f.csv', sep='\s+') # sep can be RegEx (any number of spaces)
 pd.read_csv('f.csv', index_col=['id', 'name']) # set colums as index
 pd.read_csv('f.csv', skiprows=[1,3])
 pd.read_csv('f.csv', nrows=2) #import only first 2 rows (+ header)
+pd.read_csv('foo.csv', parse_dates=['year'])
 
 data_chunks = pd.read_csv('filename.csv', chunksize=2)
 data_chunks.get_chunk() # or iterate over chunks with a for loop
@@ -51,7 +59,9 @@ pd.read_csv('f.csv', na_values=['?', -9999]) # fills with NaNs
 ```
 
 ### Indexing
+{% include _html/menu_pandas_.html %}
 ```python
+pd.read_csv('foo.csv', index_col=['id', 'name']) # set colums as index
 df.index = df['id'].astype(str) + df['name']
 df.index.is_unique # if False df.loc may rerturns multiple Series
 df.reindex(df.index[::-1]) # reverse (or change) order of rows
@@ -63,32 +73,139 @@ df.sort_index(ascending=True, axis=1) # sort columns indexes
 df.set_index(['id', 'name']) # hierarchical indexing
 df.loc[(2, 'bob')] # access hierarchical indexing
 df.iloc[2] # indexing by column number
+df.stack(level=1) # from rows to columns
+df.unstack(level=1) # from columns to rows
+
 
 ```
 
 ### Selection
+{% include _html/menu_pandas_.html %}
 ```python
 s[:-4], s[:'charlie'] # numpy slicing or slicing with labels
 df.query('id>2') # equivalent to df[df['id']>2]
 df.query('id > @variable') # use @ to use a variable in the current namespace
 df.loc[2, ['id', 'name']] # get a row as a Series
+df.loc['row_start':'row_end', 'col_start':'col_end']
 ```
 
 
-### Functions
+
+### TimeSeries
+{% include _html/menu_pandas_.html %}
 ```python
-df.apply(np.median, axis=0)
-df[['name','id']].sort_values(ascending=[False,True], by=['id', 'name'])
+pd.read_csv('foo.csv', parse_dates=['year'])
+df.date = pd.to_datetime(df.date)
+df.resample('10AS') #resample every decade
+
+# Fill up missing dates
+dt = df.date_range('01-01-2017', '01-11-2017')
+idx = pd.DatetimeIndex(dt)
+df.reindex(idx)
+
+```
+
+BusinessDay | 'B' | business day (weekday)
+Week | 'W' | one week
+MonthEnd | 'M' | calendar month end
+MonthBegin | 'MS' | calendar month begin
+BusinessMonthBegin | 'BMS' | business month begin
+YearEnd | 'A' | calendar year end
+YearBegin | 'AS' or 'BYS' | calendar year begin
+BYearEnd | 'BA' | business year end
+BYearBegin | 'BAS' | business year begin
+Easter | None | Easter holiday
+CustomBusinessHour | 'CBH' | custom business hour
+Day | 'D' | one absolute day
+Hour | 'H' | one hour
+Minute | 'T' or 'min' | one minute
+Second | 'S' | one second
+Milli | 'L' or 'ms' | one millisecond
+Micro | 'U' or 'us' | one microsecond
+Nano | 'N' | one nanosecond
+
+
+### Clean
+{% include _html/menu_pandas_.html %}
+```python
 df.isnull()
-df.dropna() # drops entire rows in which one or more values are missing (how='all' if all the fields are missing)
+df.dropna() # how='all' if all the fields are missing, thres=2 if at least two good
 df.fillna({'id': 0, 'name': 'unknown'}) # or just df.fillna(-999) or by interpolation method='bfill'
 df.['age'].fillna(df.['age'].mean(skipna=True), inplace=True) # fix a signle column
+df.interpolate() # linear interpolation on missing data
+
+df.replace({'col_name1':{
+                'replace this':'with_this',
+                'that':'with 0'}
+            'col_name2':{...}})
+
+df.replace('[A-Za-z]', '', regex=True)
+df.replace(['poor', 'good', 'amazing'], [0,1,2])
+```
+
+### Explore
+{% include _html/menu_pandas_.html %}
+```python
+df.shape
+df.info()
+df.describe() # include='all' describes non-numeric as well
+df[['name','id']].sort_values(ascending=[False,True], by=['id', 'name'])
+s.value_counts() # number of non NaN items
+df.col_name.nunique() # number of unique values
+
+```
+
+### Grouping
+{% include _html/menu_pandas_.html %}
+```python
+g = df.groupby('col_name')
+for group_element_name, group_element_df in g:
+    pass
+
+g.get_group('group name')
+g.mean() # or sum or plot 
+
+
+df.pivot(index='date', columns='city', values='temperature')
+df.pivot_table(index='date', columns='city', aggfunc='mean') #margins=True
+df.pivot_table(pd.Grouper(freq='M', key='date'), columns='temperature')
+pd.melt(df, id_vars=['keep_col_1', 'keep_col_2'..], var_name='var_name', value_name='value_name')
+pd.cross_tab(df.job_title, df.gender, aggfunc='count') # margins=True, normalize='index'
 ```
 
 
+### Join
+{% include _html/menu_pandas_.html %}
+```python
+pd.concat([df1, df2], ignore_index=True, axis='columns') # concat with reindexing
+pd.concat([df1, df2], ignore_index=False, keys=['df1_key_name', 'df2_key_name']) # concat with reindexing
+
+df_left.merge(df_right, how='inner') # inner->intersection, outer->union, left->left+intersection, right
+df_left.merge(df_right, indicator=True) #add column with merging specifications
+
+```
+
+### SQL
+{% include _html/menu_pandas_.html %}
+```python
+import pymysql
+import sqlalchemy
+
+eng = sqlalchemy.create_engine('mysql+pymysql://root:psw@localhost:3306/dbname')
+eng.execute('DROP TABLE table_name_to_drop')
+
+#db type (can be 'oracle://'), user, psw, host name, port, database name
+df = pd.read_sql_table('table_name', eng) # columns=['col1', 'col2', ..]
 
 
+query = '''
+    SELECT users.name, users.email, orders.name
+    FROM users INNER JOIN orders
+    ON users.id = orders.id
+'''
+df = pd.read_sql_query(query, eng) # chunksize.. for large amount of data
 
+```
 
 
 
