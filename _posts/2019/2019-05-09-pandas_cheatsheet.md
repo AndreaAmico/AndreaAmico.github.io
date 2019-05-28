@@ -64,6 +64,9 @@ pd.read_csv('f.csv', na_values=['?', -9999]) # fills with NaNs
 pd.read_csv('foo.csv', index_col=['id', 'name']) # set colums as index
 df.index = df['id'].astype(str) + df['name']
 df.index.is_unique # if False df.loc may rerturns multiple Series
+
+df.reset_index(inplace=True, drop=True)
+
 df.reindex(df.index[::-1]) # reverse (or change) order of rows
 df.reindex(range(0, 10), fill_value='hey') # force new index and fill up missings
 df.reindex(range(0, 10), method='ffill') # fill up with selected method
@@ -75,8 +78,6 @@ df.loc[(2, 'bob')] # access hierarchical indexing
 df.iloc[2] # indexing by column number
 df.stack(level=1) # from rows to columns
 df.unstack(level=1) # from columns to rows
-
-
 ```
 
 ### Selection
@@ -180,8 +181,9 @@ pd.cross_tab(df.job_title, df.gender, aggfunc='count') # margins=True, normalize
 pd.concat([df1, df2], ignore_index=True, axis='columns') # concat with reindexing
 pd.concat([df1, df2], ignore_index=False, keys=['df1_key_name', 'df2_key_name']) # concat with reindexing
 
-df_left.merge(df_right, how='inner') # inner->intersection, outer->union, left->left+intersection, right
-df_left.merge(df_right, indicator=True) #add column with merging specifications
+# inner->intersection, outer->union, left->left+intersection, right
+df_left.merge(df_right, how='inner', suffixes=('_left', '_right'))
+df_left.merge(df_right, indicator=True) # add column with merging specifications
 
 ```
 
