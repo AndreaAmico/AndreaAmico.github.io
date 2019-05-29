@@ -96,8 +96,11 @@ df.loc['row_start':'row_end', 'col_start':'col_end']
 {% include _html/menu_pandas_.html %}
 ```python
 pd.read_csv('foo.csv', parse_dates=['year'])
-df.date = pd.to_datetime(df.date)
+df.date = pd.to_datetime(df.date) # format='%Y-%m-%d'
 df.resample('10AS') #resample every decade
+
+## if date is the index:
+df.loc[df.index.month == 1].mean() # get the average in Genuary
 
 # Fill up missing dates
 dt = df.date_range('01-01-2017', '01-11-2017')
@@ -105,6 +108,7 @@ idx = pd.DatetimeIndex(dt)
 df.reindex(idx)
 
 ```
+#### Resample strings
 
 BusinessDay | 'B' | business day (weekday)
 Week | 'W' | one week
@@ -125,6 +129,36 @@ Milli | 'L' or 'ms' | one millisecond
 Micro | 'U' or 'us' | one microsecond
 Nano | 'N' | one nanosecond
 
+<br>
+
+#### Datetime string format
+
+%a |  : : Locale’s abbreviated weekday name.
+%A |  : : Locale’s full weekday name.
+%b |  : : Locale’s abbreviated month name.
+%B |  : : Locale’s full month name.
+%c |  : : Locale’s appropriate date and time representation.
+%d |  : : Day of the month as a decimal number [01,31].
+%f |  : : Microsecond as a decimal number [0,999999], zero-padded on the left
+%H |  : : Hour (24-hour clock) as a decimal number [00,23].
+%I |  : : Hour (12-hour clock) as a decimal number [01,12].
+%j |  : : Day of the year as a decimal number [001,366].
+%m |  : : Month as a decimal number [01,12].
+%M |  : : Minute as a decimal number [00,59].
+%p |  : : Locale’s equivalent of either AM or PM.
+%S |  : : Second as a decimal number [00,61].
+%U |  : : Week number of the year (Sunday as the first day of the week)
+%w |  : : Weekday as a decimal number [0(Sunday),6].
+%W |  : : Week number of the year (Monday as the first day of the week)
+%x |  : : Locale’s appropriate date representation.
+%X |  : : Locale’s appropriate time representation.
+%y |  : : Year without century as a decimal number [00,99].
+%Y |  : : Year with century as a decimal number.
+%z |  : : UTC offset in the form +HHMM or -HHMM.
+%Z |  : : Time zone name (empty string if the object is naive).
+%% |  : : A literal '%' character.
+
+<br>
 
 ### Clean
 {% include _html/menu_pandas_.html %}
