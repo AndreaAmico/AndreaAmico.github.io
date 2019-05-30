@@ -6,45 +6,36 @@ categories: fast_copy_paste
 ---
 
 {% highlight python %}
-# Public libraries
-import fitwrap as fw
-import glob, os, sys, shutil # system packages
-import matplotlib.pyplot as plt
-import mpmath as mp
-import nptable
+import os, sys
+os.environ['PYTHONHASHSEED']=str(0)
+import random
+random.seed(0)
 import numpy as np
+np.random.seed(0)
+import tensorflow as tf
+tf.set_random_seed(0)
+
 import pandas as pd
+import matplotlib.pyplot as plt
 import pickle
-import scipy.constants as const
-import scipy.ndimage as ndimage
-import scipy.optimize as opt
-import scipy.signal as signal
+import itertools
 import time
-
-# Local libraries
-# sys.path.append("./pyLi") # Adds pyLi directory to python modules path.
-# import lithium as li
-# import other as ot
-
-# Loading constants
-a0 = const.physical_constants["Bohr radius"][0]
-c = const.physical_constants["speed of light in vacuum"][0]
-h = const.physical_constants["Planck constant"] [0]
-hbar = h/(2*np.pi)
-kB = const.physical_constants["Boltzmann constant"][0]
-m = 9.9883414 * 10**(-27) # Lithium mass [Kg]
-muB = const.physical_constants["Bohr magneton"][0]
+from IPython.display import display, clear_output
 
 
-# Setting inline plots in notebook
+%config InlineBackend.figure_format = 'retina'
+%matplotlib inline
 %load_ext autoreload
 %autoreload 2
-%matplotlib inline
-if os.name == 'posix':
-    %config InlineBackend.figure_format = 'retina' #retina display settings
-    
-# Set and create an os independent savepath
-save_path = os.sep.join((os.path.expanduser("~"), "Desktop", "jupyter"))
-os.makedirs(save_path, exist_ok=True)
-mplc = plt.rcParams['axes.prop_cycle'].by_key()['color']
 {% endhighlight %}
+
+
+### Keras reproducibility
+Use this to ensure seproducibility when using keras: notice the restriction to a single core
+```python
+from keras import backend as K
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+```
+
