@@ -1,4 +1,4 @@
-.boxing {
+* {
     box-sizing: border-box;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .row {
-    margin: 8px -16px;
+    margin: 10px -16px;
 }
 
 /* Add padding BETWEEN each column (if you want) */
@@ -35,7 +35,7 @@
 /* Create three equal columns that floats next to each other */
 .column {
     float: left;
-    width: 30%;
+    width: 33.33%;
     display: none; /* Hide columns by default */
 }
 
@@ -64,6 +64,7 @@
   padding: 12px 16px;
   background-color: white;
   cursor: pointer;
+  margin:3px 0px;
 }
 
 /* Add a grey background color on mouse-over */
