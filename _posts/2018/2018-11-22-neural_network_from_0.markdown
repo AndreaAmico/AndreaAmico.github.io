@@ -75,8 +75,8 @@ class NeuralNetwork(object):
 
 ## Track racing
 
-Lets use the the network we just created to solve a simple task: we generate an horizontal random racing trak and player wins if it reacher the end without running off the road. A random track can be generated as follow:
-{% highlight python %}
+Lets use the the network we just created to solve a simple task: we generate an horizontal random racing track and player wins if it reacher the end without running off the road. A random track can be generated as follow:
+```python
 xx = np.arange(0, 400)
 
 freq = np.exp(-(xx/10-20)**2/100)
@@ -84,7 +84,8 @@ par = (xx/10-25)**2/100
 top_barrier = np.sin(xx/10*freq)*0.5 + 0.1 + np.sin(xx/10) + par
 top_barrier = top_barrier - top_barrier[0] + 0.5
 bottom_barrier = top_barrier - 1
-{% endhighlight %}
+```
+
 <p style="text-align:center;"><img src="/asset/images/nn_from_0/simple_track.svg" alt="sigmoid" width="800"></p>
 
 ## Player physics
@@ -105,28 +106,30 @@ class Player(object):
 
 ## Running simulation
 
-Lets define two helper functions. The former runs the simulation given a set of genomes, the track and the nueral network. The latter plot both the track together with the player paths for a given set of genomes.
+Lets define two helper functions. The former runs the simulation given a set of genomes, the track and the neural network. The latter plot both the track together with the player paths for a given set of genomes.
+
+The `run` function take as input a set of genomes and create the players. The player variable has the shape *(number_of_genomes, track_length)*, where *track_length* corresponds to the horizontal size of the track. Moreover, `sensor` list contains the position of three sensors owed by the player: each frame the player know the position of the track boundaries few pixels ahead. We initialize the neural network with the genomes and we run the simulation for *track_length - last_sensor* steps. Finally the function returns a list of score and genomes, sorted by the score. If `get_path==True` the path of each player is returned.
 
 ```python
-def run(genomes, top_barrier, bottom_barrier, network, get_path=False):
+def run(genomes, top_barrier, bottom_barrier, network, get_path=False, sensors=[0, 5, 9]):
     player = Player(np.zeros(genomes.shape[0]), np.zeros(genomes.shape[0]))
     network.set_genome(genomes)
-    pp = np.ones([genomes.shape[0], top_barrier.shape[0]])
-    max_score = (top_barrier.shape[0] - CUT)
+    players = np.ones([genomes.shape[0], top_barrier.shape[0]])
+    max_score = (top_barrier.shape[0] - sensors[-1])
     scores = np.ones(genomes.shape[0])*max_score
     
     for index in range(max_score):
-        pp[:, index] = player.p
+        players[:, index] = player.p
 
         inputs = np.array([player.v,
-                           player.p-top_barrier[index],
-                           player.p-bottom_barrier[index],
-                           player.p-top_barrier[index+5],
-                           player.p-bottom_barrier[index+5],
-                           player.p-top_barrier[index+9],
-                           player.p-bottom_barrier[index+9]
+                           player.p-top_barrier[index + sensors[0]],
+                           player.p-bottom_barrier[index + sensors[0]],
+                           player.p-top_barrier[index + sensors[1]],
+                           player.p-bottom_barrier[index + sensors[1]],
+                           player.p-top_barrier[index + sensors[2]],
+                           player.p-bottom_barrier[index + sensors[2]]
                           ]).reshape(7, genomes.shape[0]).transpose()
-        
+    
         force = network.feedforward(inputs).flatten() - 0.5
         player.step(force=force)
         is_out = np.logical_or(player.p>top_barrier[index], player.p<bottom_barrier[index])
@@ -134,10 +137,14 @@ def run(genomes, top_barrier, bottom_barrier, network, get_path=False):
         scores = np.min([scores, current], axis=0).astype(np.int)
         
     if get_path:
-        return [pp, scores]
+        return [players, scores]
     results = [scores, genomes]
     return list(zip(*sorted(list(zip(*results)), key=lambda x: -x[0])))
+```
 
+The function `plot_genome` plots the track and the 
+
+```python
 def plot_genome(genomes, top_barrier, bottom_barrier, network, alpha=0.5):
     genomes = np.array(genomes)
     xx = np.arange(top_barrier.shape[0])

@@ -831,10 +831,10 @@ L 15.164 -228.14
 L 12.932 -228.14 
 L 10.7 -228.14 
 z
-" id="m75d4f6d6d0" style="stroke:#dddddd;"/>
+" id="m8f65d94694" style="stroke:#dddddd;"/>
     </defs>
-    <g clip-path="url(#pa83c374b55)">
-     <use style="fill:#dddddd;stroke:#dddddd;" x="0" xlink:href="#m75d4f6d6d0" y="238.84"/>
+    <g clip-path="url(#pfb614ce25c)">
+     <use style="fill:#dddddd;stroke:#dddddd;" x="0" xlink:href="#m8f65d94694" y="238.84"/>
     </g>
    </g>
    <g id="PolyCollection_2">
@@ -1642,10 +1642,10 @@ L 15.164 -197.044204
 L 12.932 -195.813668 
 L 10.7 -194.565464 
 z
-" id="m46f244b303" style="stroke:#dddddd;"/>
+" id="m6e8351b155" style="stroke:#dddddd;"/>
     </defs>
-    <g clip-path="url(#pa83c374b55)">
-     <use style="fill:#dddddd;stroke:#dddddd;" x="0" xlink:href="#m46f244b303" y="238.84"/>
+    <g clip-path="url(#pfb614ce25c)">
+     <use style="fill:#dddddd;stroke:#dddddd;" x="0" xlink:href="#m6e8351b155" y="238.84"/>
     </g>
    </g>
    <g id="matplotlib.axis_1"/>
@@ -1673,7 +1673,7 @@ L 903.5 10.7
   </g>
  </g>
  <defs>
-  <clipPath id="pa83c374b55">
+  <clipPath id="pfb614ce25c">
    <rect height="217.44" width="892.8" x="10.7" y="10.7"/>
   </clipPath>
  </defs>
