@@ -6,11 +6,16 @@ categories: python
 ---
 
 {% highlight python %}
-def progress_bar(current_value, max_value):
-    progress = ((current_value+1)/max_value)*100
-    if progress>98: progress=100
-    print('\r[{0}{1}] {2:.1f}%'.format('#'*int(progress/2), ' '*(50-int(progress/2)), progress), end='')
+def progress_bar(current_value, max_value, size=50):
+    prog = (current_value+1)/max_value
+    left = '#'*int(prog * size + 0.5) # 0.5 to round up when casting to int
+    right = '-'*(size-len(left))
+    print('\r[{}{}] {:.1f}%'.format(left, right, prog*100), end='')
 
+{% endhighlight %}
+
+
+{% highlight python %}  
 for index, item in enumerate(items):
     # DO YOUR THINGS
     progress_bar(index, len(items))
