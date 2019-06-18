@@ -142,7 +142,7 @@ def run(genomes, top_barrier, bottom_barrier, network, get_path=False, sensors=[
     return list(zip(*sorted(list(zip(*results)), key=lambda x: -x[0])))
 ```
 
-The function `plot_genome` plots the track and the 
+The function `plot_genome` plots the track and the path chosen by the different genomes. The better is the result of the signle genome, the darker is its path color.
 
 ```python
 def plot_genome(genomes, top_barrier, bottom_barrier, network, alpha=0.5):
@@ -162,12 +162,18 @@ def plot_genome(genomes, top_barrier, bottom_barrier, network, alpha=0.5):
 ```
 
 
-Lets initialize the neural network and set a population of 50, with a evolution CUT of 10:
+Lets initialize the neural network with the following structure 
+
+and set a population of 50, with a evolution CUT of 10:
 
 ```python
 network = NeuralNetwork(network_structure=[7,8,4,1])
 POPULATION = 50
-CUT = 10
+np.random.seed(42)
+
+
+genomes = np.random.uniform(-1, 1, size=(POPULATION, network.genome_size))
+results =  run(genomes, top_barrier, bottom_barrier, network)
 ```
 
 
