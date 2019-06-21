@@ -21,7 +21,7 @@ def increment_filename(path, filename, ext):
     files = glob(os.path.join(path, filename+"(*)."+ext))
     if files:
         files.sort()
-        new_count = int(re.findall(regex_pattern, os.path.basename(files[-1]))[-1]) + 1
+        new_count = int(re.findall(regex_pattern, os.path.basename(files[-1]))[-1])+1
         new_complete_path = re.sub(regex_pattern, str(new_count), files[-1])
     else:
         single = glob(os.path.join(path, filename+'.'+ext))
