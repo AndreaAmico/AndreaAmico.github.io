@@ -44,34 +44,38 @@ categories: fast_copy_paste
 
 // Incremental search
     { "keys": ["ctrl+i"], "command": "show_panel", 
-           "args": {"panel": "find", "reverse":false} },
-       { "keys": ["ctrl+shift+i"], "command": "show_panel", 
-           "args": {"panel": "find", "reverse":true} },
-       { "keys": ["ctrl+i"], "command": "find_next",
-           "context":
-           [
-               {"key": "panel", "operand": "find"},
-               { "key": "panel_visible", "operator": "equal", "operand": true }
-           ]
-       },
-       { "keys": ["ctrl+shift+i"], "command": "find_prev",
-           "context":
-           [
-               {"key": "panel", "operand": "find"},
-               { "key": "panel_visible", "operator": "equal", "operand": true }
-           ]
-       },
-       { "keys": ["enter"], "command": "hide_after_word",
-           "context":
-           [
-               {"key": "panel", "operand": "find"},
-               { "key": "panel_visible", "operator": "equal", "operand": true }
-           ]
-       },
-       {
-           "keys": ["f5"],
-           "command": "revert"
-       },
+           "args": {"panel": "find", "reverse":false}
+    },
+
+    { "keys": ["ctrl+shift+i"], "command": "show_panel", 
+           "args": {"panel": "find", "reverse":true}
+    },
+
+   { "keys": ["ctrl+i"], "command": "find_next",
+       "context":
+       [
+           {"key": "panel", "operand": "find"},
+           { "key": "panel_visible", "operator": "equal", "operand": true }
+       ]
+   },
+   { "keys": ["ctrl+shift+i"], "command": "find_prev",
+       "context":
+       [
+           {"key": "panel", "operand": "find"},
+           { "key": "panel_visible", "operator": "equal", "operand": true }
+       ]
+   },
+   { "keys": ["enter"], "command": "hide_panel",
+       "context":
+       [
+           {"key": "panel", "operand": "find"},
+           { "key": "panel_visible", "operator": "equal", "operand": true }
+       ]
+   },
+   {
+       "keys": ["f5"],
+       "command": "revert"
+   },
 
 // Console
   { "keys": ["ctrl+0"], "command": "show_panel", "args": {"panel": "console", "toggle": true} },
@@ -115,4 +119,5 @@ categories: fast_copy_paste
     ]
   }
 ]
+
 {% endhighlight %}
