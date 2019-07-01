@@ -31,6 +31,9 @@ here we download the dataset directly from the keras library and we normalize th
 Since we want to build a noise robust model, we artificially add noise to the input dataset: first we apply a Gaussian filter to each image, and finally, we add white noise. To avoid building a model that corrects only for a particular type/magnitude of noise and blurring, for each image in the dataset, we changed the amount of blurring (randomly modifying the sigma of the Gaussian filter) and the magnitude of the white noise. Moreover, we perform soft data augmentation by creating four copies of the training data (exploiting the fact that, during the training, the noise introduced in each image will be different).
 
 ```python
+import numpy as np
+from scipy import ndimage
+
 x_train = np.concatenate((x_train, x_train, x_train, x_train), axis=0)
 x_test = np.concatenate((x_test, x_test, x_test, x_test), axis=0)
 
@@ -53,7 +56,11 @@ The final training dataset has 240000 samples.
 
 ### Autoencoder model
 We define the autoencoder model as follow:
+
+
 ```python
+from keras.layers import Input, Dense
+
 input_img = Input(shape=(28, 28, 1))
 
 x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
@@ -78,6 +85,9 @@ We notice how the model is almost symmetric with respect to the middle layer (th
 It is time to train the model. Following again Francois Chollet's suggestion, we used the `adadelta` optimizer and `binary_crossentropy` as losses. To train the network we exploited the GPU runtime of (Google Colab)[colab.research.google.com], which gave us a performance boost of almost a factor of 40 (from about 309 seconds per epoch to 8 seconds). 
 
 ```python
+from keras.models import Model, load_model
+from keras.layers import Conv2D, MaxPooling2D, UpSampling2D
+
 autoencoder = Model(input_img, decoded)
 autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 ​
@@ -98,6 +108,7 @@ Note how, apparently surprisingly, the validation loss seems lower than the trai
 
 Let's test how the model performs on the test image dataset: we pick a random image and we feed it into the autoencoder network by progressively increasing the blurring and the noise level:
 ```python
+import matplotlib.pyplot as plt
 fig, [ax_input, ax_output] = plt.subplots(2, 6, figsize=(12, 4))
 
 for i in range(6):
