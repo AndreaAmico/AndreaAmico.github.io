@@ -28,4 +28,4 @@ for i in tqdm(range(10)):
     ### DO YOUR THINGS
 ```
 
-(Here)[https://github.com/tqdm/tqdm]'s the git repository.
+[Here](https://github.com/tqdm/tqdm)'s the git repository.
