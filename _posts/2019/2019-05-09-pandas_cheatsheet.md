@@ -206,6 +206,10 @@ df.pivot_table(index='date', columns='city', aggfunc='mean') #margins=True
 df.pivot_table(pd.Grouper(freq='M', key='date'), columns='temperature')
 pd.melt(df, id_vars=['keep_col_1', 'keep_col_2'..], var_name='var_name', value_name='value_name')
 pd.cross_tab(df.job_title, df.gender, aggfunc='count') # margins=True, normalize='index'
+
+# Resampling non-timeseries data
+df.reset_index(drop=True).groupby(by=lambda x: int(x/WINDOW_SIZE), axis=0).mean()
+
 ```
 
 
