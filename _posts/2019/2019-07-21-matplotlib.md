@@ -10,7 +10,7 @@ categories: data_analysis
 def color(index, alpha=1):
     color_list = ['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70', '#a07060',
                   '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
-    return color_list[index % len(color_list)] + hex(int(255 * alpha))[2:]
+    return f'{color_list[index % len(color_list)]}{int(255 * alpha):02x}'
 ```
 
 ### Plots
@@ -22,7 +22,16 @@ for ax in fig.axes:
     ax.set_xticks([])
     ax.set_yticks([])
 
+
+
 ax.fig.savefig('./figurename.png', bbox_inches='tight', dpi=300)
+```
+
+### Remove stuff
+```python
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+plt.axis('off') # remove all axis
 ```
 
 ### Plot, scatter and errorbar
