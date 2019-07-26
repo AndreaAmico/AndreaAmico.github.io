@@ -163,5 +163,15 @@ ax2.grid(alpha=0.4)
 fig.savefig('./plots/grid_spec.svg', bbox_inches='tight')
 ```
 
+### Ticks and locators
+```python
+for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+    label.set_fontname('Arial')
+    label.set_fontsize(14)
 
+import matplotlib.ticker as ticker
+ax.xaxis.set_major_locator(ticker.MultipleLocator(np.pi))
+ax.xaxis.set_minor_locator(ticker.MultipleLocator(np.pi/4))
 
+ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, numticks=15))
+```
