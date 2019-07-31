@@ -77,4 +77,4 @@ from sklearn.decomposition import PCA
 pca = PCA(n_components=2)
 X_2D = pca.fit_transform(X)
 ```
-<p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/PCA.svg" alt="PCA" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/simple_PCA.svg" alt="PCA" width="800"></p>
