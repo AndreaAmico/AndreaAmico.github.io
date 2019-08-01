@@ -35,8 +35,6 @@ plt.axis('off') # remove all axis
 ```
 
 ### Plot, scatter and errorbar
-<p style="text-align:center;"><img src="/asset/images/matplotlib/basic_plots.svg" alt="basic plots" width="800"></p>
-
 ```python
 from sklearn.datasets import load_iris
 iris_dataset = load_iris()
@@ -94,10 +92,10 @@ for ax in fig.axes:
 plt.tight_layout()
 fig.savefig('./basic_plots.svg', bbox_inches='tight')
 ```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/basic_plots.svg" alt="basic plots" width="800"></p>
+
 
 ### Dimensionality reduction
-<p style="text-align:center;"><img src="/asset/images/matplotlib/dimensionality_reduction.svg" alt="dimensionality reduction" width="600"></p>
-
 ```python
 from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
@@ -134,10 +132,10 @@ plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
 
 fig.savefig('./plots/dimensionality_reduction.svg', bbox_inches='tight')
 ```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/dimensionality_reduction.svg" alt="dimensionality reduction" width="600"></p>
+
 
 ### Coloreful axes
-<p style="text-align:center;"><img src="/asset/images/matplotlib/grid_spec.svg" alt="grid_spec" width="600"></p>
-
 ```python
 # left=None, bottom=None, right=None, top=None, wspace=None,
 # hspace=None, width_ratios=None, height_ratios=None
@@ -162,16 +160,55 @@ ax2.grid(alpha=0.4)
 
 fig.savefig('./plots/grid_spec.svg', bbox_inches='tight')
 ```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/grid_spec.svg" alt="grid_spec" width="600"></p>
+
+### Text
+```python
+fig, ax = plt.subplots(1, figsize=(12,2))
+x = np.linspace(0.1, 0.9, 6)
+y = np.cos(x * 101)
+
+ax.text(x[0], y[0], 'Simple text')
+ax.text(x[1], y[1], 'Alignement', horizontalalignment='right', verticalalignment='top')
+ax.text(x[2], y[2], 'Rotation', rotation=75, rotation_mode='anchor')
+ax.text(x[3], y[3], 'BIG IMPACT', fontsize=20, fontfamily='Impact', color=color(2))
+ax.text(x[4], y[4], '$\\Delta$ LaTeX is fine')
+ax.text(x[5], y[5], 'bbox', bbox=dict(boxstyle='Round', edgecolor=color(0), facecolor=color(8), pad=0.8))
+
+[ax.spines[pos].set_color('#aaaaaa') for pos in ax.spines]
+ax.plot(x, y, '+', color='gray', markersize=6)
+ax.set(**dict(xlim=[0, 1], ylim=[-1.3, 1.3], xticks=[], yticks=[]))
+```
+
+<p style="text-align:center;"><img src="/asset/images/matplotlib/text.svg" alt="text" width="800"></p>
+
+
+
 
 ### Ticks and locators
 ```python
-for label in (ax.get_xticklabels() + ax.get_yticklabels()):
-    label.set_fontname('Arial')
-    label.set_fontsize(14)
+fig, ax = plt.subplots(1, figsize=(12,2))
+x = np.linspace(0, np.pi*4, 2000)
+plt.plot(x, np.cos(x)*7+8, color=color(0))
+ax.set_xlim(0.0, np.pi*4)
+ax.set_ylim(1, 16)
 
+########################################## X AXIS
+for label in (ax.get_xticklabels()):
+    label.set_fontsize(18)
+    
 import matplotlib.ticker as ticker
 ax.xaxis.set_major_locator(ticker.MultipleLocator(np.pi))
-ax.xaxis.set_minor_locator(ticker.MultipleLocator(np.pi/4))
+ax.xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
+ax.set_xticks(np.linspace(0, np.pi*4, 5))
+ax.set_xticklabels([0, '$\\pi$', '$2\\pi$', '$3\\pi$', '$4\\pi$'])
 
-ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, numticks=15))
+########################################## Y AXIS
+for label in (ax.get_yticklabels()):
+    label.set_fontname('Impact')
+    label.set_fontsize(14)
+    
+ax.set_yscale('log', basey=2)
+ax.yaxis.set_major_locator(ticker.LogLocator(base=4))
 ```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/ticks.png" alt="ticks" width="800"></p>
