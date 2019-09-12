@@ -5,7 +5,16 @@ date:   2016-09-02 18:30:00 +0100
 categories: fast_copy_paste
 ---
 
+### Simple imports
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from pathlib import Path
+%matplotlib inline
+```
 
+### On MacOS
 ```python
 import os, sys, glob
 import numpy as np
@@ -19,6 +28,19 @@ import matplotlib.pyplot as plt
 %autoreload 2
 ```
 
+### Colab
+```python
+try:
+    import google.colab
+    from google.colab import drive
+
+    drive.mount(Path('/content/gdrive'), force_remount=True)
+    root_path = Path('gdrive/My Drive/Colab Notebooks/')/'FOLDER_NAME'
+    print('Working on google colab')
+except:
+    root_path = Path('../')
+    print('Working locally')
+```
 
 ### Keras reproducibility
 Use this to ensure seproducibility when using keras: notice the restriction to a single core

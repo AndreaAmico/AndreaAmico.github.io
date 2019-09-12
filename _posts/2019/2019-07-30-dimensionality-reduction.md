@@ -79,3 +79,29 @@ X_2D = pca.fit_transform(X)
 ```
 
 <p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/pca.png" alt="pca_comparison" width="800"></p>
+
+
+## Code for plots
+```python
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
+
+X = np.random.normal(loc=30, scale=50, size=[10000, 1])
+scaler = skl.preprocessing.StandardScaler()
+scaler.fit(X)
+X_scaled = scaler.transform(X)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15,3))
+for ax in (ax1, ax2):
+    ax.set_yticks([])
+    ax.set_yticks([])
+    ax.spines['left'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+ax1.text(30, 0, 'BEFORE', size=30, color=color(8), horizontalalignment='center', verticalalignment='bottom')
+ax2.text(0, 0, 'AFTER', size=30, color=color(8), horizontalalignment='center', verticalalignment='bottom')
+ax1.hist(X, bins=30, density=True, color=color(0))
+ax2.hist(X_scaled, bins=30, density=True, color=color(0));
+# fig.savefig('./plots/standardization.png',  bbox_inches='tight')
+```
