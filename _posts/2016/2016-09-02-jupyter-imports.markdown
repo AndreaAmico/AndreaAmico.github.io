@@ -34,7 +34,7 @@ try:
     import google.colab
     from google.colab import drive
 
-    drive.mount(Path('/content/gdrive'), force_remount=True)
+    drive.mount('/content/gdrive', force_remount=True)
     root_path = Path('gdrive/My Drive/Colab Notebooks/')/'FOLDER_NAME'
     print('Working on google colab')
 except:
