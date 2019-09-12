@@ -21,16 +21,16 @@ classifiers = [
     [SVC(kernel="linear", C=0.025), 'SVC_linear'],
     [SVC(gamma=2, C=1), 'SVC'],
     [DecisionTreeClassifier(max_depth=5), 'DecisionTree'],
-    [RandomForestClassifier(max_depth=5, n_estimators=100, max_features=1), 'RandomForest'],
+    [RandomForestClassifier(max_depth=5, n_estimators=100, max_features=1),
+        'RandomForest'],
     [MLPClassifier(alpha=1, max_iter=1000), 'MPL'],
     [AdaBoostClassifier(), 'AdaBoost'],
     [GaussianNB(), 'GaussianNB'],
     [QuadraticDiscriminantAnalysis(), 'QuadraticDiscriminantAnalysis']]
-```
 
-```python
 for clf, clf_name in classifiers:
     t0 = time.time()
     clf.fit(X_train, y_train)
-    print(f'{clf_name}: {accuracy_score(y_test, clf.predict(X_test))*100:.1f}%  Completed in {time.time()-t0:.2f}s')
+    metric = accuracy_score(y_test, clf.predict(X_test))*100
+    print(f'{clf_name}: {metric:.1f}%  Completed in {time.time()-t0:.2f}s')
 ```
