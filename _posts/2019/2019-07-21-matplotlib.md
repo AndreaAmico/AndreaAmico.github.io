@@ -7,10 +7,9 @@ categories: data_analysis
 
 ### My colors
 ```python
-def color(index, alpha=1):
-    color_list = ['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70', '#a07060',
-                  '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
-    return f'{color_list[index % len(color_list)]}{int(255 * alpha):02x}'
+from cycler import cycler
+colors = color=['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70', '#a07060', '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
+plt.rcParams['axes.prop_cycle'] = cycler(color = colors)
 ```
 
 ### Plots
@@ -177,7 +176,7 @@ ax.text(x[5], y[5], 'bbox', bbox=dict(boxstyle='Round', edgecolor=color(0), face
 
 [ax.spines[pos].set_color('#aaaaaa') for pos in ax.spines]
 ax.plot(x, y, '+', color='gray', markersize=6)
-ax.set(**dict(xlim=[0, 1], ylim=[-1.3, 1.3], xticks=[], yticks=[]))
+ax.set(xlim=[0, 1], ylim=[-1.3, 1.3], xticks=[], yticks=[])
 ```
 
 <p style="text-align:center;"><img src="/asset/images/matplotlib/text.svg" alt="text" width="800"></p>
