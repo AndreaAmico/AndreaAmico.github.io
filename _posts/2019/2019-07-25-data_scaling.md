@@ -77,8 +77,8 @@ for ax in (ax1, ax2):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
-ax1.text(30, 0, 'BEFORE', size=30, color=color(8), horizontalalignment='center', verticalalignment='bottom')
-ax2.text(0, 0, 'AFTER', size=30, color=color(8), horizontalalignment='center', verticalalignment='bottom')
+ax1.text(30, 0, 'BEFORE', size=30, color=color(8), ha='center', va='bottom')
+ax2.text(0, 0, 'AFTER', size=30, color=color(8), ha='center', va='bottom')
 ax1.hist(X, bins=30, density=True, color=color(0))
 ax2.hist(X_scaled, bins=30, density=True, color=color(0));
 # fig.savefig('./plots/standardization.png',  bbox_inches='tight')
