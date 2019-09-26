@@ -8,7 +8,8 @@ categories: data_analysis
 ### My colors
 ```python
 from cycler import cycler
-colors = color=['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70', '#a07060', '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
+colors = ['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70','#a07060',
+          '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
 plt.rcParams['axes.prop_cycle'] = cycler(color = colors)
 ```
 
@@ -22,16 +23,21 @@ for ax in fig.axes:
     ax.set_yticks([])
 
 
-
 ax.fig.savefig('./figurename.png', bbox_inches='tight', dpi=300)
 ```
 
 ### Remove stuff
 ```python
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-plt.axis('off') # remove all axis
+fig, ax = plt.subplots(1, figsize=(8, 1.5))
+ax.barh(range(5), np.random.random(5), height=0.6, color=colors)
+[ax.spines[pos].set_visible(False) for pos in ('right', 'left', 'bottom', 'top')];
+[mt.set_color('none') for mt in ax.get_xmajorticklabels()];
+[mt.set_color(color) for mt, color in zip(ax.get_ymajorticklabels(), colors)];
+[tl.set_color('none') for tl in ax.get_yticklines()];
+ax.set(yticks=range(5), yticklabels=['I', 'II', 'III', 'IV', 'V']);
 ```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/set_colors.svg" alt="set colors" width="550"></p>
+
 
 ### Plot, scatter and errorbar
 ```python
