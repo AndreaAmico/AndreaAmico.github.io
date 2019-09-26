@@ -38,6 +38,12 @@ ax.set(yticks=range(5), yticklabels=['I', 'II', 'III', 'IV', 'V']);
 ```
 <p style="text-align:center;"><img src="/asset/images/matplotlib/set_colors.svg" alt="set colors" width="550"></p>
 
+### Padding ticks and labels
+```python
+ax.tick_params(axis='x', direction='out', pad=-3)
+ax.xaxis.labelpad = 5
+```
+
 
 ### Plot, scatter and errorbar
 ```python
