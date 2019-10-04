@@ -2,7 +2,7 @@
 layout: post
 title:  "Denoise with autoencoders"
 date:   2019-06-24 22:00:00 +0100
-categories: machine_learning
+categories: deep_learning
 ---
 
 <p style="text-align:center;"><img src="/asset/images/autoencoder/same_noise_level_title.png" alt="denoise example" width="800"></p>

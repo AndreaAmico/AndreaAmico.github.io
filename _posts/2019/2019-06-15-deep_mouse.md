@@ -2,7 +2,7 @@
 layout: post
 title:  "Deep Mouse"
 date:   2019-06-15 22:00:00 +0100
-categories: machine_learning
+categories: deep_learning
 ---
 
 In this project, we follow the thought processes behind the development of a simple neural network. It is an A-to-Z description of a neural network construction, starting from the acquisition of the dataset up to the evaluation of the model, including errors and steps-back.
