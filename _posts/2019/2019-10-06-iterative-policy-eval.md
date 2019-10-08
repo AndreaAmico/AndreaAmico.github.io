@@ -43,77 +43,91 @@ Here's the code to reproduce the optimization of the path to reach the end of th
 import numpy as np
 import matplotlib.pyplot as plt
 
-def sim():
-    SIZE = 4
+SIZE = 4
+
+def do_action(x, y, action):
+    if action==0:
+        return x, min(y+1, SIZE-1)
+    if action==1:
+        return x, max(y-1, 0)
+    if action==2:
+        return min(x+1, SIZE-1), y
+    if action==3:
+        return max(x-1, 0), y
+    
+def action_argmax(x, y, v, reward):
+    values = []
+    for action in range(4):
+        xp, yp = do_action(x, y, action)
+        values.append(v[xp, yp] + reward[xp, yp])
+    return np.where(values==np.max(values))[0]
+
+def define_reward():
     reward = -np.ones([SIZE,SIZE])
     reward[1:, 0] = -5
     reward[:-1, 2] = -5
+    return reward
 
-    pi = np.ones([SIZE,SIZE,4])*0.25
-    v0 = np.zeros([SIZE,SIZE])
-    v1 = np.zeros([SIZE,SIZE])
-    while True:
-        def do_action(x, y, action):
-            if action==0:
-                return x, min(y+1, SIZE-1)
-            if action==1:
-                return x, max(y-1, 0)
-            if action==2:
-                return min(x+1, SIZE-1), y
-            if action==3:
-                return max(x-1, 0), y
-            
-        def action_argmax(x, y, v):
-            values = []
+def loop_states():
+    for x in range(SIZE):
+        for y in range(SIZE):
+            if not((x==0 and y==0)):
+                yield x, y
+
+def estimate_value_function(v0, v1, reward, pi, delta_max=0.001):
+    delta = 1
+    while delta > delta_max:
+        for x, y in loop_states():
             for action in range(4):
                 xp, yp = do_action(x, y, action)
-                values.append(v[xp, yp] + reward[xp, yp])
-            return np.where(values==np.max(values))[0]
-            
-        delta = 1
+                v1[x, y] = v1[x, y] + pi[x, y, action]*(reward[xp, yp] + v0[xp, yp])
+        delta = np.sum(np.abs(v0-v1))
+        v0, v1 = v1, np.zeros([SIZE,SIZE])
+    return v0, v1
 
-        while delta > 0.001:
-            for x in range(SIZE):
-                for y in range(SIZE):
-                    if not((x==0 and y==0)):
-                        for action in range(4):
-                            xp, yp = do_action(x, y, action)
-                            v1[x, y] = v1[x, y] + pi[x, y, action]*(reward[xp, yp] + v0[xp, yp])
+def initialize_policy():
+    return np.ones([SIZE,SIZE,4])*0.25
 
-            delta = np.sum(np.abs(v0-v1))
-            v0, v1 = v1, np.zeros([SIZE,SIZE])
-            
-        def plot_it(v):
-            fig, ax = plt.subplots(1, figsize=(SIZE+1, SIZE+1-0.2))
-            ax.set(xlim=(-0.5,SIZE-0.5), ylim=(SIZE-0.5, -0.5))
-            for x in range(SIZE):
-                for y in range(SIZE):
-                    if not(x==0 and y==0):
-                        ax.text(x, y, f'{v[x, y]:.1f}', ha='center', va='center')
-                        ax.scatter(x, y, marker='s', s=5000, edgecolors = 'black',color='none', alpha=-(reward[x,y])/np.max(np.abs(reward)), linewidths=2)
-                        ax.scatter(x, y, marker='s', s=1500, edgecolors = 'none', color='#0c6575', alpha=(-v0[x,y])/np.max(np.abs(v0))*0.8, linewidths=2)
-                        ax.annotate("", xy=(x, y+0.45), xytext=(x, y+0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 0]))
-                        ax.annotate("", xy=(x, y-0.45), xytext=(x, y-0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 1]))
-                        ax.annotate("", xy=(x+0.45, y), xytext=(x+0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 2]))
-                        ax.annotate("", xy=(x-0.45, y), xytext=(x-0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 3]))
-            ax.text(0, 0, 'GOAL', ha='center', va='center', color='green', size=18)
-            plt.axis('off')
-            plt.tight_layout()
-            return fig
+def initialize_state_values():
+    return np.zeros([SIZE,SIZE]), np.zeros([SIZE,SIZE])
 
-        yield plot_it(v0)
+def plot_value_function(v, reward, pi):
+    fig, ax = plt.subplots(1, figsize=(SIZE+1, SIZE+1-0.2))
+    ax.set(xlim=(-0.5,SIZE-0.5), ylim=(SIZE-0.5, -0.5))
+    for x, y in loop_states():
+        ax.text(x, y, f'{v[x, y]:.1f}', ha='center', va='center')
+        ax.scatter(x, y, marker='s', s=5000, edgecolors = 'black',color='none',
+                   alpha=-(reward[x,y])/np.max(np.abs(reward)), linewidths=2)
+        ax.scatter(x, y, marker='s', s=1500, edgecolors = 'none', color='#0c6575',
+                   alpha=(-v[x,y])/np.max(np.abs(v))*0.8, linewidths=2)
+        ax.annotate("", xy=(x, y+0.45), xytext=(x, y+0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 0]))
+        ax.annotate("", xy=(x, y-0.45), xytext=(x, y-0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 1]))
+        ax.annotate("", xy=(x+0.45, y), xytext=(x+0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 2]))
+        ax.annotate("", xy=(x-0.45, y), xytext=(x-0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 3]))
+    ax.text(0, 0, 'GOAL', ha='center', va='center', color='green', size=18)
+    plt.axis('off')
+    plt.tight_layout()
+    return fig
+
+
+def optimize_path():
+    reward = define_reward()
+    pi = initialize_policy()
+    v0, v1 = initialize_state_values()
+
+    while True:
+        v0, v1 = estimate_value_function(v0, v1, reward, pi)
+
+        yield plot_value_function(v0, reward, pi)
         
-        for x in range(SIZE):
-            for y in range(SIZE):
-                pi[x, y, :] = 0
-                max_actions = action_argmax(x, y, v0)
-                for action in max_actions:
-                    pi[x, y, action] = 1/max_actions.shape[0]
+        for x, y in loop_states():
+            pi[x, y, :] = 0
+            max_actions = action_argmax(x, y, v0, reward)
+            for action in max_actions:
+                pi[x, y, action] = 1/max_actions.shape[0]
 
-        
-
-        yield plot_it(v0)
-s = sim()
+        yield plot_value_function(v0, reward, pi)
+s = optimize_path()
 ```
 
 ```python
