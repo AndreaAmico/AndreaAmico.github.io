@@ -100,10 +100,14 @@ def plot_value_function(v, reward, pi):
                    alpha=-(reward[x,y])/np.max(np.abs(reward)), linewidths=2)
         ax.scatter(x, y, marker='s', s=1500, edgecolors = 'none', color='#0c6575',
                    alpha=(-v[x,y])/np.max(np.abs(v))*0.8, linewidths=2)
-        ax.annotate("", xy=(x, y+0.45), xytext=(x, y+0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 0]))
-        ax.annotate("", xy=(x, y-0.45), xytext=(x, y-0.25), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 1]))
-        ax.annotate("", xy=(x+0.45, y), xytext=(x+0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 2]))
-        ax.annotate("", xy=(x-0.45, y), xytext=(x-0.25, y), arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 3]))
+        ax.annotate("", xy=(x, y+0.45), xytext=(x, y+0.25),
+                    arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 0]))
+        ax.annotate("", xy=(x, y-0.45), xytext=(x, y-0.25),
+                    arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 1]))
+        ax.annotate("", xy=(x+0.45, y), xytext=(x+0.25, y),
+                    arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 2]))
+        ax.annotate("", xy=(x-0.45, y), xytext=(x-0.25, y),
+                    arrowprops=dict(arrowstyle="->", alpha=pi[x, y, 3]))
     ax.text(0, 0, 'GOAL', ha='center', va='center', color='green', size=18)
     plt.axis('off')
     plt.tight_layout()
