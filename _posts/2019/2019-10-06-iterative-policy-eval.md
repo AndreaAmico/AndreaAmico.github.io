@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Iterative policy evaluation"
-date:   2019-10-06 23:00:00 +0100
+date:   2019-10-06 22:00:00 +0100
 categories: reinforcement_learning
 ---
 
