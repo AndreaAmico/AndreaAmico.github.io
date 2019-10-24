@@ -78,6 +78,10 @@ df.loc[(2, 'bob')] # access hierarchical indexing
 df.iloc[2] # indexing by column number
 df.stack(level=1) # from rows to columns
 df.unstack(level=1) # from columns to rows
+
+## Flatten a hierarchical index in columns
+df.columns = ['_'.join(col).strip() for col in df.columns.values]
+# flatten the index if the df is obtained by grouping: df = df.reset_index()
 ```
 
 ### Selection
