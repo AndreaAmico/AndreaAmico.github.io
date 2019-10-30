@@ -12,13 +12,13 @@ permalink: /topics/
 #### {{ nt }} {#cat-{{nt}}}
 <ul> 
   {% for post in site.posts %}
-     {% for pt in post.categories %}
-    {% if nt == pt %}
-      <li>
-        {{post.published}} <a href="{{ post.url }}">{{ post.title }}</a>
-      </li>
-    {% endif %}
-   {% endfor %}
+    {% for pt in post.categories %}
+      {% if nt == pt %}
+        <li>
+          {{post.published}} <a href="{{ post.url }}">{{ post.title }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
   {% endfor %}
 </ul>  
 {% endfor %}
