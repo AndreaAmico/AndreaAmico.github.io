@@ -2,7 +2,7 @@
 layout: post
 title:  "fitwrap module"
 date:   2018-03-03 11:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 

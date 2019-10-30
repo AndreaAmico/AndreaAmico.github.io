@@ -2,7 +2,7 @@
 layout: post
 title:  "Jupyter import"
 date:   2016-09-02 18:30:00 +0100
-categories: fast_copy_paste
+categories: fast-copy-paste
 ---
 
 ### Simple imports

@@ -2,7 +2,7 @@
 layout: post
 title:  "Neural Network from scratch"
 date:   2018-11-22 22:00:00 +0100
-categories: reinforcement_learning
+categories: reinforcement-learning
 ---
 
 Let's build a simple neural network from scratch in pure python plus numpy and finally train it in a genetic fashion.

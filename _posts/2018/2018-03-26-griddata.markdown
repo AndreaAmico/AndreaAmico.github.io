@@ -2,7 +2,7 @@
 layout: post
 title:  "Grid data"
 date:   2018-03-26 09:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 

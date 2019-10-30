@@ -2,7 +2,7 @@
 layout: post
 title:  "Iterative policy evaluation"
 date:   2019-10-06 22:00:00 +0100
-categories: reinforcement_learning
+categories: reinforcement-learning
 ---
 
 The iterative policy evaluation can be used to optimize the decision making in a **Markov Decision Process (MDP)**. In such a problem we have an agent, which can perform actions in an environment. The action brings the agent from a state *s* to a state *s'* and doing so, the agent receives a reward *r*. The actions available and the reward depend only on the state *s* the agent is currently in. There is no memory in the system, the state the agent is in contains all the information: the previous state history does not make any difference.

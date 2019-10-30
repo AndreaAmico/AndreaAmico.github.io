@@ -2,7 +2,7 @@
 layout: post
 title:  "Data scaling"
 date:   2019-07-25 22:00:00 +0100
-categories: ML_tools
+categories: ML-tools
 ---
 
 ### Normalization

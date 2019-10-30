@@ -2,7 +2,7 @@
 layout: post
 title:  "Matplotlib"
 date:   2019-07-21 22:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 ### My colors

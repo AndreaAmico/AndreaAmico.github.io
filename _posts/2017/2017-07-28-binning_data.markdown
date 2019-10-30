@@ -2,7 +2,7 @@
 layout: post
 title:  "Binning data"
 date:   2017-07-27 22:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 Possible way to bin data using numpy digitize function:

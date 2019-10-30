@@ -2,7 +2,7 @@
 layout: post
 title:  "Binning image"
 date:   2017-07-30 22:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 

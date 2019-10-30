@@ -2,7 +2,7 @@
 layout: post
 title:  "Monte Carlo RL"
 date:   2019-10-14 21:00:00 +0100
-categories: reinforcement_learning
+categories: reinforcement-learning
 ---
 
 A Markov decision process (MDP) can be optimized using various reinforcement learning techniques. Sometimes the best way to optimize the decision process is using the Monte Carlo sampling technique, in particular, when:

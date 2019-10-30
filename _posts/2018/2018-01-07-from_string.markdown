@@ -2,7 +2,7 @@
 layout: post
 title:  "String to np.array"
 date:   2018-01-20 22:00:00 +0100
-categories: data_analysis
+categories: data-analysis
 ---
 
 Take a string in the format:

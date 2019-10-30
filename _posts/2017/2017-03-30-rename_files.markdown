@@ -2,7 +2,7 @@
 layout: post
 title:  "Rename files"
 date:   2017-04-19 22:00:00 +0100
-categories: fast_copy_paste
+categories: fast-copy-paste
 ---
 
 In the folder *".\my_folder\subfolder\subsubfolder\"* there are files named:
