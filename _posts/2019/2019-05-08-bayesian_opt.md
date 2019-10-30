@@ -2,7 +2,7 @@
 layout: post
 title:  "Bayesian optimization"
 date:   2019-05-08 07:00:00 +0100
-categories: machine_learning
+categories: reinforcement_learning
 ---
 
 ## Why Bayesian optimization

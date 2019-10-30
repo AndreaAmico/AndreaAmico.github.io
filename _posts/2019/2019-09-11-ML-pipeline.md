@@ -2,7 +2,7 @@
 layout: post
 title:  "ML pipeline"
 date:   2019-09-11 23:00:00 +0100
-categories: machine_learning
+categories: ML_tools
 ---
 
 ### Shuffling and splitting
