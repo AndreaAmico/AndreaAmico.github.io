@@ -45,6 +45,8 @@ df.drop([1], axis=0, inplace=True) # drop row
 ### Load data
 {% include _html/menu_pandas_.html %}
 ```python
+pd.read_clipboard(sep='\s\s+') # read from clipboard!
+
 pd.read_csv('f.csv', header=None) # default header is 0, 
 pd.read_csv('f.csv', sep='\s+') # sep can be RegEx (any number of spaces)
 pd.read_csv('f.csv', index_col=['id', 'name']) # set colums as index
