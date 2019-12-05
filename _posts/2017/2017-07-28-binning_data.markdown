@@ -6,7 +6,7 @@ categories: data-analysis
 ---
 
 
-Using scipy.stat:
+Using scipy.stats:
 ```python
 from scipy.stats import binned_statistic
 
