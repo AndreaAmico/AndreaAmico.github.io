@@ -61,7 +61,7 @@ pd.merge(left=df_left,right=df_right, left_on='x', right_on='x', suffixes=['_L',
 
 
 ### Indicator
-When merging with `how` option others then 'inner' one can use `indicator=True` flag to add a new column to the dataframe describing for each row if it was merged using `both` left and right dataframes, `left_only` or `right_only`.
+When merging with `how` option others then 'inner' one can use `indicator=True` flag to add a new column to the data frame describing for each row if it was merged using `both` left and right data frames, `left_only` or `right_only`.
 
 
 
@@ -71,8 +71,8 @@ When merging with `how` option others then 'inner' one can use `indicator=True` 
 ### Validate
 `validate` parameter can be used to *assert* the type of relation between the two merged tables:
  - “one_to_one” or “1:1”: assert if merge keys are unique in both left and right datasets.
- - “one_to_many” or “1:m”: assert if merge keys are unique in left dataset.
- - “many_to_one” or “m:1”: assert if merge keys are unique in right dataset.
+ - “one_to_many” or “1:m”: assert if merge keys are unique in the left dataset.
+ - “many_to_one” or “m:1”: assert if merge keys are unique in the right dataset.
  - “many_to_many” or “m:m”: allowed, but does not result in checks.
 
 
@@ -82,4 +82,4 @@ df_right = pd.DataFrame(dict(x=[2,1,1], y=['C', 'B', 'A']), index=[7,8,9])
 pd.merge(left=df_left, right=df_right, left_on='x', right_on='x', validate='1:1')
 ```
 
-would resurt in a **MergeError**.
+would result in a **MergeError**.
