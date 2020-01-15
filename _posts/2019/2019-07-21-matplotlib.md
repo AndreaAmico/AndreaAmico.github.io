@@ -30,10 +30,16 @@ ax.fig.savefig('./figurename.png', bbox_inches='tight', dpi=300)
 ```python
 fig, ax = plt.subplots(1, figsize=(8, 1.5))
 ax.barh(range(5), np.random.random(5), height=0.6, color=colors)
+
+## remove spines
 [ax.spines[pos].set_visible(False) for pos in ('right', 'left', 'bottom', 'top')];
-[mt.set_color('none') for mt in ax.get_xmajorticklabels()];
-[mt.set_color(color) for mt, color in zip(ax.get_ymajorticklabels(), colors)];
+
+## remove ticks and ticklabels
 [tl.set_color('none') for tl in ax.get_yticklines()];
+[mt.set_color('none') for mt in ax.get_xmajorticklabels()];
+
+## custom label and colors
+[mt.set_color(color) for mt, color in zip(ax.get_ymajorticklabels(), colors)];
 ax.set(yticks=range(5), yticklabels=['I', 'II', 'III', 'IV', 'V']);
 ```
 <p style="text-align:center;"><img src="/asset/images/matplotlib/set_colors.svg" alt="set colors" width="550"></p>
