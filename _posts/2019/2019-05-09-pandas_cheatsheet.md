@@ -105,11 +105,15 @@ pd.read_csv('foo.csv', parse_dates=['year'])
 df.date = pd.to_datetime(df.date) # format='%Y-%m-%d'
 df.resample('10AS') #resample every decade
 
+## set date as index
+df.set_index('date')
+
 ## if date is the index:
 df.loc[df.index.month == 1].mean() # get the average in Genuary
+df['2015-02-25':'2015:02-27'] # select range of dates
 
 # Fill up missing dates
-dt = df.date_range('01-01-2017', '01-11-2017')
+dt = pd.date_range('01-01-2017', '01-11-2017')
 idx = pd.DatetimeIndex(dt)
 df.reindex(idx)
 
