@@ -229,3 +229,53 @@ ax.set_yscale('log', basey=2)
 ax.yaxis.set_major_locator(ticker.LogLocator(base=4))
 ```
 <p style="text-align:center;"><img src="/asset/images/matplotlib/ticks.png" alt="ticks" width="800"></p>
+
+
+### 3D plots
+```python
+from mpl_toolkits.mplot3d import Axes3D
+from scipy import ndimage
+from matplotlib.patches import Rectangle
+import mpl_toolkits.mplot3d.art3d as art3d
+
+################## CREATE NICE LOOKING FIELD  #########################
+np.random.seed(0)
+X_SIZE, Y_SIZE = 150, 30
+field = (np.random.uniform(-0.5, 0.5, size=[Y_SIZE*10, X_SIZE*10]))
+field = ndimage.gaussian_filter(field, 25)
+field = field.reshape(Y_SIZE, 10, X_SIZE, 10).sum(3).sum(1) #binning
+field = field - np.ones(field.shape)*np.arange(field.shape[1])*0.02
+
+yx = np.mgrid[:Y_SIZE, :X_SIZE]
+x, y, z = yx[1].flatten(), yx[0].flatten(), field.flatten()
+#######################################################################
+
+
+fig = plt.figure(figsize=(8, 6))
+ax = fig.gca(projection='3d', proj_type='ortho', azim=-20, elev=40)
+
+# Rectangle patch
+rect_patch = Rectangle([0, 1.5], 30, 0.5, color=(0.5,0.7,0.5,0.1))
+ax.add_patch(rect_patch)
+art3d.pathpatch_2d_to_3d(rect_patch, z=0, zdir="x")
+
+ax.plot_trisurf(x, y, z, linewidth=0, antialiased=True, cmap='Greens_r',
+                shade=True, alpha=0.6, zorder=3, vmin=-4, vmax=2)
+ax.set(xlim3d=(0, 150), ylim3d=(0, 30), xticks=[], yticks=[], zticks=[])
+
+
+# Set spines colors (alpha channel to remove)
+ax.w_xaxis.line.set_color('red')
+ax.w_yaxis.line.set_color('green')
+ax.w_zaxis.line.set_color('blue')
+
+# Set panes color
+ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.w_yaxis.set_pane_color((0.5,0.5,1,0.1))
+ax.w_zaxis.set_pane_color((0.95, 0.95, 0.95, 1))
+
+# ax.yaxis.pane.fill = False
+# ax.xaxis.pane.fill = False
+ax.grid(None)
+```
+<p style="text-align:center;"><img src="/asset/images/matplotlib/3d.svg" alt="ticks" width="800"></p>
