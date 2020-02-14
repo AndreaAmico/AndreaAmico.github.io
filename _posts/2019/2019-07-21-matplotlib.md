@@ -33,6 +33,7 @@ ax.barh(range(5), np.random.random(5), height=0.6, color=colors)
 
 ## remove spines
 [ax.spines[pos].set_visible(False) for pos in ('right', 'left', 'bottom', 'top')];
+ax.set_axis_off()
 
 ## remove ticks and ticklabels
 [tl.set_color('none') for tl in ax.get_yticklines()];
