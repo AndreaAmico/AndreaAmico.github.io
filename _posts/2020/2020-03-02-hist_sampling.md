@@ -46,7 +46,7 @@ for ax in (ax0, ax1):
     ax.tick_params(axis='y', color='none')
     [ax.spines[d].set_visible(False) for d in ('top', 'left', 'right')]
 ```
-<p style="text-align:center;"><img src="/asset/images/data_analysis/hist_comparison.png" alt="histogram comparison" width="700"></p>
+<p style="text-align:center;"><img src="/asset/images/data_analysis/hist_comparison.png" alt="histogram comparison" width="500"></p>
 
 
 ## Histogram sampling in 2D
