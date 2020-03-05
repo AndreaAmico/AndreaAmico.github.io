@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Histogram sampling"
-date:   2020-02-22 20:00:00 +0100
+date:   2020-03-02 20:00:00 +0100
 categories: data-analysis
 ---
 
