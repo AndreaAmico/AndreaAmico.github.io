@@ -1,0 +1,22 @@
+I"<h2 id="connect-to-google-drive">Connect to google drive</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">google.colab</span>
+    <span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+
+    <span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s">'/content/gdrive'</span><span class="p">,</span> <span class="n">force_remount</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">root_path</span> <span class="o">=</span> <span class="s">'gdrive/My Drive/Colab Notebooks/WORKING_FOLDER_NAME/'</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Working on google colab'</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">root_path</span> <span class="o">=</span> <span class="s">'../'</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Working locally'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="download-files-using-chrome">Download files (using chrome)</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">files</span>
+<span class="n">files</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s">'my_file.txt'</span><span class="p">)</span> 
+</code></pre></div></div>
+
+<h2 id="select-tensorflow-2x">Select tensorflow 2.x</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">tensorflow_version</span> <span class="mf">2.</span><span class="n">x</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,94 @@
+I"=<p>Simple data exchange between client and server over IP.</p>
+
+<p>The data is stored in a <code class="highlighter-rouge">Struct</code> and then packed to be sent as binary data. <code class="highlighter-rouge">fmt</code> is the description of the <a href="https://docs.python.org/3.1/library/struct.html" title="https://docs.python.org/3.1/library/struct.html">struct</a> content. In the client-server example below <code class="highlighter-rouge">fmt = '!I30sd'</code>: the <strong>!</strong> refers to the byte-order convenction (big-endian for nework in this case), <strong>I</strong> stands for unsigned-int (4 bytes), <strong>30s</strong> stands for 30 char (1 byte each) and <strong>d</strong> stands for a double (8 bytes).</p>
+
+<p><code class="highlighter-rouge">Line</code> can be initialized both as a client and as a server. The server application must be launched before the client. When data is sent, the listener application runs the function <code class="highlighter-rouge">action</code> with the data received as first argument. <code class="highlighter-rouge">actionargs</code> can be used to share variables (in the example below it is used for a queue object).</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">'!I2sd'</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">actionargs</span><span class="o">=</span><span class="p">[],</span> <span class="n">ip</span><span class="o">=</span><span class="s">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span> <span class="o">=</span> <span class="n">actionargs</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">((</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span><span class="p">,)</span>
+
+        <span class="k">if</span> <span class="n">server</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_address</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">,</span> <span class="n">client_address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">CONNECTION_ATTEMPTS</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">CONNECTION_ATTEMPTS</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_address</span><span class="p">)</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">"Connected with server."</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">time</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">"Connection attempt "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s">" of 5 failed."</span><span class="p">)</span>
+                    <span class="n">SLEEP_BETWEEN_CONNECTION_ATTEMPTS</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">SLEEP_BETWEEN_CONNECTION_ATTEMPTS</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">threading</span>
+            <span class="n">listener_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">listener</span><span class="p">)</span>
+            <span class="n">listener_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">listener</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">dataByte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dataByte</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">dataByte</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actionargs</span><span class="p">)</span>              
+
+    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">message</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></code></pre></figure>
+
+<p>Server:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">queue</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">ipcomm</span>
+
+<span class="k">def</span> <span class="nf">c_fun</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">jobs</span><span class="p">):</span>
+    <span class="n">jobs</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">jobs</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">process_job</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s">": "</span><span class="o">+</span><span class="n">b</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">))</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+<span class="n">fmt</span><span class="o">=</span><span class="s">'!I30sd'</span>
+<span class="n">myServer</span> <span class="o">=</span> <span class="n">ipcomm</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">c_fun</span><span class="p">,</span> <span class="n">actionargs</span><span class="o">=</span><span class="n">jobs</span><span class="p">)</span>
+<span class="n">pj</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">process_job</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">jobs</span><span class="p">,))</span>
+<span class="n">pj</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">pj</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></code></pre></figure>
+
+<p>Client:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">ipcomm</span>
+
+<span class="n">fmt</span><span class="o">=</span><span class="s">'!I30sd'</span>
+
+<span class="n">myClient</span> <span class="o">=</span> <span class="n">ipcomm</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">Number of repetition: "</span><span class="p">))</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"String to write: "</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s">"Sleep time (s): "</span><span class="p">))</span>
+    <span class="n">myClient</span><span class="o">.</span><span class="n">send</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">" &gt;&gt;&gt;&gt;&gt;&gt; Struct sent to the client &gt;&gt;&gt;&gt;&gt;&gt;"</span><span class="p">)</span></code></pre></figure>
+
+<p><img src="/asset/images/2016-12-11/server_client_example.png" /></p>
+:ET

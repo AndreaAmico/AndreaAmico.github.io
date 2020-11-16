@@ -1,0 +1,72 @@
+I",<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">AdaBoostClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
+<span class="kn">from</span> <span class="nn">sklearn.discriminant_analysis</span> <span class="kn">import</span> <span class="n">QuadraticDiscriminantAnalysis</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+
+<span class="n">classifiers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="s">'KNeighbors'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s">"linear"</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.025</span><span class="p">),</span> <span class="s">'SVC_linear'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">SVC</span><span class="p">(</span><span class="n">gamma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s">'SVC'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="s">'DecisionTree'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_features</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="s">'RandomForest'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">MLPClassifier</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="s">'MPL'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">AdaBoostClassifier</span><span class="p">(),</span> <span class="s">'AdaBoost'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">GaussianNB</span><span class="p">(),</span> <span class="s">'GaussianNB'</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">QuadraticDiscriminantAnalysis</span><span class="p">(),</span> <span class="s">'QuadraticDiscriminantAnalysis'</span><span class="p">]]</span>
+
+<span class="k">for</span> <span class="n">clf</span><span class="p">,</span> <span class="n">clf_name</span> <span class="ow">in</span> <span class="n">classifiers</span><span class="p">:</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_valid</span><span class="p">,</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_valid</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'{clf_name}: {metric:.1f}</span><span class="si">%  </span><span class="s">Completed in {time.time()-t0:.2f}s'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="t-pot">T-POT</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># !pip install tpot
+</span><span class="kn">from</span> <span class="nn">tpot</span> <span class="kn">import</span> <span class="n">TPOTClassifier</span>
+<span class="n">tpot</span> <span class="o">=</span> <span class="n">TPOTClassifier</span><span class="p">(</span><span class="n">generations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">population_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">offspring_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mutation_rate</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">crossover_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s">'accuracy'</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_time_mins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">warm_start</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">early_stop</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">disable_update_check</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">tpot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">tpot</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_valid</span><span class="p">)</span>
+<span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="h2o-on-colab">H2O on Colab</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">!</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">default</span><span class="o">-</span><span class="n">jre</span>
+<span class="err">!</span><span class="n">java</span> <span class="o">-</span><span class="n">version</span>
+<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">h2o</span>
+
+<span class="kn">import</span> <span class="nn">h2o</span>
+<span class="kn">from</span> <span class="nn">h2o.automl</span> <span class="kn">import</span> <span class="n">H2OAutoML</span>
+
+<span class="n">h2o</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">h2o</span><span class="o">.</span><span class="n">import_file</span><span class="p">(</span><span class="s">'train.csv'</span><span class="p">)</span>
+<span class="n">valid</span> <span class="o">=</span> <span class="n">h2o</span><span class="o">.</span><span class="n">import_file</span><span class="p">(</span><span class="s">'valid.csv'</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="s">"y"</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="s">"X"</span><span class="p">]</span>
+<span class="n">train</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">asfactor</span><span class="p">()</span>
+<span class="n">valid</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">asfactor</span><span class="p">()</span>
+<span class="n">aml</span> <span class="o">=</span> <span class="n">H2OAutoML</span><span class="p">(</span><span class="n">max_runtime_secs</span> <span class="o">=</span> <span class="mi">120</span><span class="p">)</span>
+<span class="n">aml</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">training_frame</span> <span class="o">=</span> <span class="n">train</span><span class="p">)</span>
+<span class="n">aml</span><span class="o">.</span><span class="n">leaderboard</span>
+<span class="n">perf</span> <span class="o">=</span> <span class="n">aml</span><span class="o">.</span><span class="n">leader</span><span class="o">.</span><span class="n">model_performance</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span>
+<span class="n">perf</span><span class="o">.</span><span class="n">auc</span><span class="p">()</span>
+</code></pre></div></div>
+:ET

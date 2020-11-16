@@ -1,0 +1,16 @@
+I"„<p>Use example of <a href="https://docs.python.org/3/library/pickle.html" title="https://docs.python.org/3/library/pickle.html">pickle</a> library to store data.</p>
+
+<p>To store <code class="highlighter-rouge">data_to_save</code> in <code class="highlighter-rouge">"my_file.pkl"</code> just:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"my_file.pkl"</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+	<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_to_save</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span></code></pre></figure>
+
+<p>To load from the pickle file:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"my_file.pkl"</span><span class="p">,</span> <span class="s">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">pkl_file</span><span class="p">:</span>
+	<span class="n">my_loaded_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pkl_file</span><span class="p">)</span></code></pre></figure>
+
+:ET

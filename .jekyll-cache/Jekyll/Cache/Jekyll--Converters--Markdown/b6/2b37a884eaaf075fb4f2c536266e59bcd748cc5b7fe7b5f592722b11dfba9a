@@ -1,0 +1,48 @@
+I"
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">my_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">curdir</span><span class="p">,</span> <span class="s">'next'</span><span class="p">,</span> <span class="s">'myfiles'</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">my_dir</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">my_dir</span><span class="p">)</span>
+
+<span class="n">my_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">my_dir</span><span class="p">,</span> <span class="s">'file.txt'</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">my_path</span><span class="p">)</span></code></pre></figure>
+
+<p>(‘./next/myfiles’, ‘file.txt’)</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">my_path</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_file</span><span class="p">:</span> <span class="c1"># a for append
+</span>	<span class="n">my_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">'I am the first line'</span><span class="p">)</span>
+	<span class="n">my_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">', so am I.</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+	<span class="n">my_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">'I am the second.</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">my_path</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_file</span><span class="p">:</span>
+	<span class="n">content</span> <span class="o">=</span> <span class="n">my_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></code></pre></figure>
+
+<p>I am the first line, so am I.
+I am the second.
+Sry I was late.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">my_path</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_file</span><span class="p">:</span>
+	<span class="n">line_1</span> <span class="o">=</span> <span class="n">my_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+	<span class="n">line_2</span> <span class="o">=</span> <span class="n">my_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">line_1</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">line_2</span><span class="p">)</span></code></pre></figure>
+
+<p>I am the first line, so am I.</p>
+
+<p>I am the second.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">my_path</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_file</span><span class="p">:</span>
+	<span class="n">lines</span> <span class="o">=</span> <span class="n">my_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></code></pre></figure>
+
+<p>[‘I am the first line, so am I.\n’, ‘I am the second.\n’, ‘Sry I was late.’]</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">glob</span>
+<span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">my_dir</span><span class="o">+</span><span class="s">"/*.txt"</span><span class="p">)</span></code></pre></figure>
+
+<p>[’./next/myfiles/file.txt’]</p>
+:ET

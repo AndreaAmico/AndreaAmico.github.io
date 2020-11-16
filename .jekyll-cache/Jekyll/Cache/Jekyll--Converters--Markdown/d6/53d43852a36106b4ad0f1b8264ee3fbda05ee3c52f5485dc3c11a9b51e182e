@@ -1,0 +1,30 @@
+I":<p>In the folder <em>”.\my_folder\subfolder\subsubfolder"</em> there are files named:</p>
+<ul>
+  <li>fileA_1.txt</li>
+  <li>fileA_11.txt</li>
+  <li>fileA_13.txt</li>
+</ul>
+
+<p>I want to rename them changing <strong>A</strong> to <strong>B</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">'my_folder//subfolder</span><span class="err">\</span><span class="s">subsubfolder/fileA_*.txt'</span><span class="p">)</span>
+<span class="n">prev</span> <span class="o">=</span> <span class="s">'file'</span>
+<span class="n">after</span> <span class="o">=</span> <span class="s">'_</span><span class="err">\</span><span class="s">d+</span><span class="err">\</span><span class="s">.txt$'</span>
+<span class="n">old</span> <span class="o">=</span> <span class="s">'A'</span>
+<span class="n">new</span> <span class="o">=</span> <span class="s">'B'</span>
+
+<span class="n">mach_string</span> <span class="o">=</span> <span class="s">'(?&lt;={}){}(?={})'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">single_file</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">single_file</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">mach_string</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">single_file</span><span class="p">))</span></code></pre></figure>
+
+<p><code class="highlighter-rouge">os.path.abspath</code> is used to normalize the path (independently of the OS).</p>
+
+<p><code class="highlighter-rouge">glob.glob</code> returns the list af all file paths matching the input string.</p>
+
+<p><code class="highlighter-rouge">A(?=_\d+\.txt$)</code> looks for a <strong>A</strong> that preceeds a string of the type <em>“_##ANY_NUMBER##.txt”</em>.</p>
+
+<p><code class="highlighter-rouge">(?&lt;=file)A</code> checks that <strong>A</strong> is preceeded by the string <em>“file”</em>.</p>
+
+:ET

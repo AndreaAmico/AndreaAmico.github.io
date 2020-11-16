@@ -1,0 +1,58 @@
+I" <p>Recap of <code class="highlighter-rouge">.format()</code> method (<a href="https://pyformat.info/" title="https://pyformat.info/">here</a> for a more detailed description).
+<em>NB: Multiple spaces are represented with underscores.</em></p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:4d}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span></code></pre></figure>
+
+<p>“__42”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:06.2f}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="mf">3.141592653589793</span><span class="p">)</span></code></pre></figure>
+
+<p>“003.14”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:.2e}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span></code></pre></figure>
+
+<p>“1.00e+05”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{}, {}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'one'</span><span class="p">,</span> <span class="s">'two'</span><span class="p">)</span></code></pre></figure>
+
+<p>“one, two”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{1}, {0}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'one'</span><span class="p">,</span> <span class="s">'two'</span><span class="p">)</span></code></pre></figure>
+
+<p>“two, one”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:&gt;10}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'test'</span><span class="p">)</span></code></pre></figure>
+
+<p>“<em>__</em>__test”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:10}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'test'</span><span class="p">)</span></code></pre></figure>
+
+<p>“test__<em>__</em>”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:&lt;{}s}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'test'</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span></code></pre></figure>
+
+<p>“test____”</p>
+
+<hr />
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="s">'{:^10}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="s">'test'</span><span class="p">)</span></code></pre></figure>
+
+<p>“__ test __”</p>
+
+:ET

@@ -1,0 +1,211 @@
+I"��<p>Let’s build a simple neural network from scratch in pure python plus numpy and finally train it in a genetic fashion.</p>
+
+<p>Let’s start importing the libraries we need in a Jupiter notebook:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="n">sys</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">cm</span> 
+<span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="n">ndimage</span>
+
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">'posix'</span><span class="p">:</span>
+    <span class="o">%</span><span class="n">config</span> <span class="n">InlineBackend</span><span class="o">.</span><span class="n">figure_format</span> <span class="o">=</span> <span class="s">'retina'</span> <span class="c1">#retina display settings
+</span></code></pre></div></div>
+
+<p>Let us define the activation function. We choose here a sigmoid, but it can be easily changed to a tanh or one of the many ReLu variants.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/sigmoid.svg" alt="sigmoid" height="200" /></p>
+
+<p>Let us create our neural network class. In the <code class="highlighter-rouge">__init__</code> function we require the <code class="highlighter-rouge">network_structure</code>, which is a list of integers defining the size of each layer of the network. <code class="highlighter-rouge">network_structure[0]</code> is the size of the input layer, while <code class="highlighter-rouge">network_structure[-1]</code> the size of the output one. The number of degrees of freedom of the network can be obtained using the <code class="highlighter-rouge">genome_size</code> function. Using set <code class="highlighter-rouge">set_genome</code> one can load a set of genomes into the network. Its input (<code class="highlighter-rouge">genome</code>) is a 2D numpy array containing a sequence of different genomes. Its shape must be <em>(number_of_genomes, genome_size)</em>.</p>
+
+<p>Finally, the <code class="highlighter-rouge">feedforward</code> function uses the network to map a collection of inputs to a collection of outputs. The input shape must be <em>(number_of_genomes, input_size)</em>, while the shape of the output is <em>(number_of_genomes, output_size)</em>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NeuralNetwork</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network_structure</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_structure</span> <span class="o">=</span> <span class="n">network_structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_structure</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">network_structure</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">+</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span> <span class="o">+</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_genome_size</span> <span class="o">=</span> <span class="n">i</span>
+    
+    
+    <span class="k">def</span> <span class="nf">set_genome</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">genome</span><span class="p">):</span>
+        
+        <span class="n">population</span> <span class="o">=</span> <span class="n">genome</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biases</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genome</span><span class="p">[:,</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">biases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genome</span><span class="p">[:,</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">i</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">feedforward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="k">for</span> <span class="n">weigh</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">biases</span><span class="p">):</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s">'ji,jik-&gt;jk'</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">weigh</span><span class="p">)</span> <span class="o">+</span> <span class="n">bias</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layer</span>
+    
+    <span class="o">@</span><span class="nb">property</span>
+    <span class="k">def</span> <span class="nf">genome_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genome_size</span>
+</code></pre></div></div>
+
+<h2 id="track-racing">Track racing</h2>
+
+<p>Let’s use the network we just created to solve a simple task: we generate a horizontal random racing track and player wins if it reacher the end without running off the road. A random track can be generated as follow:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+
+<span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">xx</span><span class="o">/</span><span class="mi">10</span><span class="o">-</span><span class="mi">20</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">par</span> <span class="o">=</span> <span class="p">(</span><span class="n">xx</span><span class="o">/</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">100</span>
+<span class="n">top_barrier</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xx</span><span class="o">/</span><span class="mi">10</span><span class="o">*</span><span class="n">freq</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xx</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">par</span>
+<span class="n">top_barrier</span> <span class="o">=</span> <span class="n">top_barrier</span> <span class="o">-</span> <span class="n">top_barrier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span>
+<span class="n">bottom_barrier</span> <span class="o">=</span> <span class="n">top_barrier</span> <span class="o">-</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/simple_track.svg" alt="simple track" width="800" /></p>
+
+<h2 id="player-physics">Player physics</h2>
+<p>Let’s define the player physics: a dot with a given 2D position and speed. Every evolution step changes the position vector by the speed vector, moreover, the speed vector is updated by the force vector (mass=1).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Player</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">v0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">v0</span>
+        
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="n">force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">/</span><span class="mi">2</span>
+</code></pre></div></div>
+
+<h2 id="running-simulation">Running simulation</h2>
+
+<p>Let’s define two helper functions. The former runs the simulation given a set of genomes, the track, and the neural network. The latter plot both the track together with the player paths for a given set of genomes.</p>
+
+<p>The <code class="highlighter-rouge">run</code> function takes as input a set of genomes and create the players. The player variable has the shape <em>(number_of_genomes, track_length)</em>, where <em>track_length</em> corresponds to the horizontal size of the track. Moreover, the <code class="highlighter-rouge">sensor</code> list contains the position of three sensors owed by the player: each frame the player knows the position of the track boundaries few pixels ahead. We initialize the neural network with the genomes and we run the simulation for <em>track_length - last_sensor</em> steps. Finally, the function returns a list of scores and genomes, sorted by the score. If <code class="highlighter-rouge">get_path==True</code> the path of each player is returned.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">genomes</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">sensors</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">]):</span>
+    <span class="n">player</span> <span class="o">=</span> <span class="n">Player</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">genomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">genomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">set_genome</span><span class="p">(</span><span class="n">genomes</span><span class="p">)</span>
+    <span class="n">players</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">genomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">top_barrier</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">max_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">top_barrier</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sensors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">genomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">max_score</span>
+    
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_score</span><span class="p">):</span>
+        <span class="n">players</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">p</span>
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">player</span><span class="o">.</span><span class="n">v</span><span class="p">,</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">top_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">bottom_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">top_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">bottom_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">top_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                           <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">-</span><span class="n">bottom_barrier</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">sensors</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                          <span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">genomes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    
+        <span class="n">force</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">feedforward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.5</span>
+        <span class="n">player</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="n">is_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">&gt;</span><span class="n">top_barrier</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">player</span><span class="o">.</span><span class="n">p</span><span class="o">&lt;</span><span class="n">bottom_barrier</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">is_out</span><span class="p">)</span><span class="o">*</span><span class="n">max_score</span> <span class="o">+</span> <span class="p">(</span><span class="n">is_out</span><span class="p">)</span><span class="o">*</span><span class="n">index</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">min</span><span class="p">([</span><span class="n">scores</span><span class="p">,</span> <span class="n">current</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">int</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">get_path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">players</span><span class="p">,</span> <span class="n">scores</span><span class="p">]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">scores</span><span class="p">,</span> <span class="n">genomes</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+</code></pre></div></div>
+
+<p>The function <code class="highlighter-rouge">plot_genome</code> plots the track and the path chosen by the different genomes. The better is the result of the single genome, the darker is its path color.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_genome</span><span class="p">(</span><span class="n">genomes</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="n">genomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">genomes</span><span class="p">)</span>
+    <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">top_barrier</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="n">genome_paths</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">genomes</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_max</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">genome_paths</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[:</span><span class="n">x_max</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">viridis</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">x_max</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="n">genome_paths</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">0.9</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">)),</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="n">top_barrier</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s">'#dddddd'</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="nb">min</span><span class="p">(</span><span class="n">bottom_barrier</span><span class="p">),</span> <span class="n">y2</span><span class="o">=</span><span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'#dddddd'</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="n">xx</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">min</span><span class="p">(</span><span class="n">bottom_barrier</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="n">top_barrier</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">a</span>
+</code></pre></div></div>
+
+<p>Let’s initialize the neural network with the following structure: <code class="highlighter-rouge">[7,8,4,1]</code>. 7 inputs, two hidden layers with 8 and 4 neurons respectively, and one output. We set each population to have 50 different genomes, which are initialized at random using a uniform distribution between -1 and 1. The result of running the simulation with this first set of random genomes is plotted below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">network</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">(</span><span class="n">network_structure</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">POPULATION</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">genomes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">POPULATION</span><span class="p">,</span> <span class="n">network</span><span class="o">.</span><span class="n">genome_size</span><span class="p">))</span>
+<span class="n">results</span> <span class="o">=</span>  <span class="n">run</span><span class="p">(</span><span class="n">genomes</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+</code></pre></div></div>
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/first_genomes.svg" alt="first genomes" width="800" /></p>
+
+<p>As expected, the first population has very poor performance. Nevertheless, we can still see that some genomes perform much better than others. We will see that defining the next generation of genomes by variations of the best performers, will quickly lead to good drivers.</p>
+
+<h2 id="evolution-and-selection">Evolution and selection</h2>
+
+<p>We now need to define how the next generation of genomes is created starting by the previous one. We choose a simple approach here: to create a child we randomly choose a parent by sampling using an exponential distribution (from the list of parents, sorted by performance). We then mutate the genome by summing each of the genome weights by a random number, selected by a uniform distribution between <code class="highlighter-rouge">-mutation_rate</code> and <code class="highlighter-rouge">+mutation_rate</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">evolution_step</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">mutation_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="n">population</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">new_generation</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">population</span><span class="p">):</span>
+        <span class="n">genome_in_mutation</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="nb">min</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">5</span><span class="p">)),</span> <span class="n">population</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">genome_in_mutation</span> <span class="o">=</span> <span class="n">genome_in_mutation</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">mutation_rate</span><span class="p">,</span> <span class="n">mutation_rate</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">genome_in_mutation</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">new_generation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genome_in_mutation</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_generation</span><span class="p">)</span>
+</code></pre></div></div>
+<p>We can now run the simulations for a number of epochs and look at the performance of the model. Below, we report the evolution after 30, 60 and 120 epochs, plotting the first 20 performers.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUMBER_OF_EPOCHS</span><span class="p">):</span>
+    <span class="n">genomes</span> <span class="o">=</span>  <span class="n">evolution_step</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">mutation_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span>  <span class="n">run</span><span class="p">(</span><span class="n">genomes</span><span class="p">,</span> <span class="n">top_barrier</span><span class="p">,</span> <span class="n">bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">20</span><span class="p">]))</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/genomes30.svg" alt="genomes 30" width="800" /></p>
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/genomes60.svg" alt="genomes 60" width="800" /></p>
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/genomes120.svg" alt="genomes 120" width="800" /></p>
+
+<p>By looking at the performance at each evolution step we can see that, between 50 and 80 epochs, the model learns how to stay on track. Beyond 100 epochs almost all the genomes complete the track with no problem.</p>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/genomes_performance.svg" alt="genomes performance" width="400" /></p>
+
+<h2 id="testing-the-model">Testing the model</h2>
+
+<p>We now want to check whether if the model learned to drive or just memorized the track. To check that, we create a brand new, much harder track, and we test how the model performs in an unknown environment, with no training. Let’s create the track:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">test_xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4000</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">test_top_barrier</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">test_xx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">test_top_barrier</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter1d</span><span class="p">(</span><span class="n">test_top_barrier</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">20</span>
+
+<span class="n">test_top_barrier</span> <span class="o">=</span> <span class="n">test_top_barrier</span> <span class="o">-</span> <span class="n">test_top_barrier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span>
+<span class="n">test_bottom_barrier</span> <span class="o">=</span> <span class="n">test_top_barrier</span> <span class="o">-</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/test_track.svg" alt="test track" width="800" /></p>
+
+<p>And run the simulation, showing again the best 20 performers.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_genome</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">20</span><span class="p">],</span> <span class="n">test_top_barrier</span><span class="p">,</span> <span class="n">test_bottom_barrier</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/nn_from_0/final_test.svg" alt="final test" width="800" /></p>
+
+<p>As we can see, all the 20 genomes reach the end of the track! The conclusion is that the neural network learned to stay on track, and its knowledge is general and not track specific.</p>
+
+:ET

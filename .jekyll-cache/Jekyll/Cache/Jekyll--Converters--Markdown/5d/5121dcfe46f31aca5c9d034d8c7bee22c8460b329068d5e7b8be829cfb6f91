@@ -1,0 +1,87 @@
+I"�<ol>
+  <li>
+    <p>Register on <a href="https://test.pypi.org">test.pypi.org</a> and <a href="https://pypi.org">pypi.org</a></p>
+  </li>
+  <li>
+    <p>Create .pypirc file and put it in ~/.pypirc (or windows10 C:\User$username$)
+(under unix set the right permission “chmod 600 ~/.pypirc”)
+<strong>.pypirc</strong>:</p>
+  </li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">[distutils]
+index-servers =
+  pypi
+  pypitest
+
+[pypi]
+username=your_username
+password=your_password
+
+[pypitest]
+repository=https://test.pypi.org/legacy/
+username=your_username
+password=your_password</code></pre></figure>
+
+<ol>
+  <li>Upload your package to github with the following files:</li>
+</ol>
+
+<p><strong>setup.py</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
+<span class="n">setup</span><span class="p">(</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="s">'my-package-name'</span><span class="p">,</span>
+  <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="s">'my-package-name'</span><span class="p">],</span>
+  <span class="n">version</span> <span class="o">=</span> <span class="s">'0.1'</span><span class="p">,</span>
+  <span class="n">description</span> <span class="o">=</span> <span class="s">'package description'</span><span class="p">,</span>
+  <span class="n">author</span> <span class="o">=</span> <span class="s">'Name LastName'</span><span class="p">,</span>
+  <span class="n">author_email</span> <span class="o">=</span> <span class="s">'gihub-username@gmail.com'</span><span class="p">,</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="s">'https://github.com/gihub-username/my-package-name'</span><span class="p">,</span>
+  <span class="n">download_url</span> <span class="o">=</span> <span class="s">'https://github.com/gihub-username/my-package-name/archive/0.1.tar.gz'</span><span class="p">,</span>
+  <span class="n">keywords</span> <span class="o">=</span> <span class="p">[</span><span class="s">'whatever'</span><span class="p">,</span> <span class="s">'you'</span><span class="p">,</span> <span class="s">'want'</span><span class="p">],</span>
+  <span class="n">classifiers</span> <span class="o">=</span> <span class="p">[],</span>
+<span class="p">)</span></code></pre></figure>
+
+<p><strong>setup.cfg</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">[metadata]
+description-file = README.md</code></pre></figure>
+
+<p><strong>README.md</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-markdown" data-lang="markdown"><span class="gu">## to do</span></code></pre></figure>
+
+<p><strong>gitignore.txt</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">*.pyc
+*.DS_Store
+*.log
+dist
+MANIFEST</code></pre></figure>
+
+<p><strong>LICENSE.txt</strong>: (MIT license example - change year and name in the first line)</p>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">Copyright (c) year Name LastName
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</code></pre></figure>
+
+<p>a folder with the package name with a <strong>__init__.py</strong> file inside.</p>
+
+<ol>
+  <li>Upload everything on github (with a tag):</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">git tag 0.0.1 -m "Here are my updates"</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-plain" data-lang="plain">git push --tags origin master</code></pre></figure>
+
+<ol>
+  <li>run: python setup.py sdist upload -r pypitest</li>
+  <li>run: python setup.py sdist upload -r pypi</li>
+</ol>
+:ET

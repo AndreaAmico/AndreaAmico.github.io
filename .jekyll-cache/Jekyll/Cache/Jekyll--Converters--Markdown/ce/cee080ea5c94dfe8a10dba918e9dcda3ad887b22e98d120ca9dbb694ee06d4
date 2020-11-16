@@ -1,0 +1,39 @@
+I"Ğ<p>Merging numpy arrays:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">intersect_arrays</span><span class="p">(</span><span class="n">x_np_array</span><span class="p">,</span> <span class="n">y_np_array</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+    <span class="n">intersection</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">,</span> <span class="n">x_np_array</span><span class="p">)</span>
+    <span class="n">return_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">intersection</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x_np_array</span><span class="p">,</span> <span class="n">y_np_array</span><span class="p">):</span>
+        <span class="n">return_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i</span><span class="o">==</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">intersection</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">return_list</span></code></pre></figure>
+
+<p>Example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">aa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">33</span><span class="p">])</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">bb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">intersect_arrays</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">],</span> <span class="p">[</span><span class="n">aa</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cc</span><span class="p">])</span></code></pre></figure>
+
+<p>[array([1, 3]), array([11, 33]), array([2, 6]), array([1, 3])]</p>
+
+<hr />
+
+<p>Merging lists:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">intersect_list</span><span class="p">(</span><span class="n">list_x1</span><span class="p">,</span> <span class="n">list_y1</span><span class="p">,</span> <span class="n">list_x2</span><span class="p">,</span> <span class="n">list_y2</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span> <span class="n">new_list_x</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">list_x1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">list_x2</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span> <span class="n">new_list_x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">list_x1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">list_x2</span><span class="p">))</span>
+    <span class="n">new_list_y1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_list_y2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_list_x</span><span class="p">:</span>
+        <span class="n">new_list_y1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_y1</span><span class="p">[</span><span class="n">list_x1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
+        <span class="n">new_list_y2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_y2</span><span class="p">[</span><span class="n">list_x2</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">new_list_x</span><span class="p">,</span> <span class="n">new_list_y1</span><span class="p">,</span> <span class="n">new_list_y2</span></code></pre></figure>
+:ET

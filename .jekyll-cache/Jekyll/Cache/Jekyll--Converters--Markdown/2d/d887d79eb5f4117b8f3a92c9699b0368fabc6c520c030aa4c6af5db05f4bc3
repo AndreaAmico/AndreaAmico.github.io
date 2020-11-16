@@ -1,0 +1,312 @@
+I"��<p>In this project, we follow the thought processes behind the development of a simple neural network. It is an A-to-Z description of a neural network construction, starting from the acquisition of the dataset up to the evaluation of the model, including errors and steps-back.</p>
+
+<p>The goal of this toy algorithm is to identify if the laptop track-pad is used either with the right or the left hand just by looking at the position of the mouse cursor in time. The scheme of the development process can be sketched as follow:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/deep_learning_development_process.png" alt="Deep learning development process" width="750" /></p>
+
+<p>It is an iterative process that periodically ends with the evaluation of the model using the <strong>dev</strong> (development) dataset. The iteration continues until the accuracy obtained on the dev set reaches our goal. Only at this point, the model is tested on the <strong>test</strong> dataset.</p>
+
+<h2 id="iterations-index">Iterations index</h2>
+<ul>
+  <li><a href="#identification-of-required-data---01">First model implementation 01</a></li>
+  <li><a href="#data-pre-processing---02">Data pre-processing 02</a></li>
+  <li><a href="#algorithm-selection---03">Algorithm optimizer 03</a></li>
+  <li><a href="#algorithm-selection---04">Neural Network structure 04</a></li>
+  <li><a href="#algorithm-selection---05">Testing SVM 05</a></li>
+  <li><a href="#lstm-size-and-learning-rate-with-Bayesopt---06">LSTM size and learning rate with Bayesopt 06</a></li>
+  <li><a href="#introducing-dropout---07">Introducing dropout 07</a></li>
+  <li><a href="#checking-training-set-size---08">Checking training set size 08</a></li>
+  <li><a href="#New-bigger-dataset---09">New, bigger, dataset - 09</a></li>
+  <li><a href="#gru-instead-of-lstm---10">GRU instead of LSTM - 10</a></li>
+  <li><a href="#gru-and-overfitting---11">GRU and overfitting - 11</a></li>
+  <li><a href="#gru-with-mouse-movement---12">GRU with mouse movement - 12</a></li>
+  <li><a href="#training-size-and-regularizers---13">Training size and regularizers - 13</a></li>
+</ul>
+
+<h3 id="identification-of-required-data---01">Identification of required data - 01<a href="#iterations-index">△</a></h3>
+<p>To train a model to recognize which hand is moving the mouse, we opted for a supervised learning approach and we, therefore, need labeled data for the training. The structure of the dataset is a <em>.csv</em> file with two columns indicating the <em>x</em> and <em>y</em> absolute coordinate of the mouse cursor on the screen. The position is recorded every ~10ms. To create the training set, we recorded the mouse position for about 10 minutes, first by using the right hand (while reading a technical blog post), then doing the same task by using the left hand. The total amount of samples is 120k (60k right, 60k left).
+The data are acquired using the win32gui library and stored in a <em>.txt</em> file via a python script:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">win32gui</span><span class="p">,</span> <span class="n">time</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'./data/my_data.txt'</span><span class="p">,</span> <span class="s">'a'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetCursorPos</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">'{},{}</span><span class="se">\n</span><span class="s">'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Right hand data are saved on <em>./data/right.txt</em> file, left hand data on <em>./data/left.txt</em> file.
+As shown in the plot below the real-time delay between subsequent acquisitions is not completely constant, moreover, spikes are present.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/data_acquisition_stability.png" alt="Data acquisition stability" width="400" /></p>
+<p>A possible improvement might be achieved by a pure c acquisition program, which includes a time delay to check every loop. For the moment, since we do not know the impact of a more stable acquisition for the model accuracy, we postpone the problem for later iterations.</p>
+
+<h3 id="data-pre-processing---01">Data pre-processing - 01<a href="#iterations-index">△</a></h3>
+<p>The full 20 minutes dataset is split into batches of 200 points each, corresponding to 2 seconds of mouse position acquisitions. Right, and left-hand data are merged in a single dataset. For the moment we use raw data from the input device, being the absolute coordinate along the horizontal and vertical direction of the screen.</p>
+
+<hr />
+<p>Loading the mouse data from the <em>.txt</em> file using <strong>pandas</strong>:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pandas</span>
+<span class="n">right</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">"../data/right.txt"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">left</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">"../data/left.txt"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</code></pre></div></div>
+<p>Splitting the data in 600 batches containing 200 data-points each:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">batch_right</span> <span class="o">=</span> <span class="p">[</span><span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">right</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">)]</span>
+<span class="n">batch_left</span> <span class="o">=</span> <span class="p">[</span><span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">left</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">)]</span>
+</code></pre></div></div>
+<p>Merging left and right datasets and convert them into <strong>numpy</strong> arrays. Create the target array <code class="highlighter-rouge">y</code> using as convention <em>0</em> for batches corresponding tho right hand and <em>1</em> for left hand. The axis of the <code class="highlighter-rouge">X</code> array correspond to: (batch index, mouse position in time, mouse coordinate index).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">batch_right</span> <span class="o">+</span> <span class="n">batch_left</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_right</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_left</span><span class="p">))</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'X shape: {X.shape}</span><span class="se">\n</span><span class="s">y shape: {y.shape}'</span><span class="p">)</span>
+</code></pre></div></div>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X shape: (600, 200, 2)
+y shape: (600,)
+</code></pre></div></div>
+
+<p>For the moment the decision of creating batches of 200 data-points is arbitrary and we still do not know if we might need for longer batches to achieve good accuracy. A batch of 200 points, using a 100Hz acquisition rate, means that we need 2 seconds of acquisition before the model can predict a result. In the plot below we show the data contained in a single data batch.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/batch_example.png" alt="Batch data example" width="500" /></p>
+
+<h3 id="definition-of-the-training-set---01">Definition of the training set - 01<a href="#iterations-index">△</a></h3>
+<p><strong>Training</strong>, <strong>dev</strong> and <strong>test</strong> sets are split in a 70%-15%-15% proportion. The training set is used for training the network, the dev set as a benchmark to optimize the ML algorithm and finally the test set to measure the accuracy of the model. It is important to keep dev and test set separated to avoid the over-fitting of the hyper-parameters of the model on the test set.</p>
+
+<hr />
+<p>The splitting between train/dev/test is achieved using the <strong>sklearn</strong> library.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">X_dev</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_dev</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_est</span><span class="p">,</span> <span class="n">y_est</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="algorithm-selection---01">Algorithm selection - 01<a href="#iterations-index">△</a></h3>
+<p>As a starting point algorithm we opted for a <strong>RNN</strong> (recurrent neural network). In particular, inspired from this <a href="https://www.analyticsvidhya.com/blog/2019/01/introduction-time-series-classification/#">blog post</a>, we used a <strong>LSTM</strong> (Long short-term memory) architecture.</p>
+
+<hr />
+<p>We implemented the neural network in <strong>keras</strong> using <strong>TensorFlow backend</strong>:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">LSTM</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'sigmoid'</span><span class="p">))</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</code></pre></div></div>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lstm_1 (LSTM)                (None, 256)               265216    
+_________________________________________________________________
+dense_1 (Dense)              (None, 1)                 257       
+=================================================================
+Total params: 265,473
+Trainable params: 265,473
+Non-trainable params: 0
+_________________________________________________________________
+</code></pre></div></div>
+
+<p>The training is performed using <strong>stochastic gradient descent</strong>, in particular using the <strong>Adam</strong> algorithm (short for Adaptive Moment Estimation). We used the <em>accuracy</em> metric and we trained the data for 200 epochs. We save the best model as <em>best_model.pkl</em>. It takes about 8 minutes to train the model using a regular laptop.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="kn">import</span> <span class="n">Adam</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="kn">import</span> <span class="n">ModelCheckpoint</span>
+
+<span class="n">adam</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+<span class="n">chk</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span><span class="s">'best_model.pkl'</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="s">'acc'</span><span class="p">,</span> <span class="n">save_best_only</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'max'</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'binary_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">adam</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s">'accuracy'</span><span class="p">])</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">chk</span><span class="p">],</span> <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">X_dev</span><span class="p">,</span> <span class="n">y_dev</span><span class="p">))</span>
+</code></pre></div></div>
+<p>The learning process during the gradient descent can be inspected by monitoring the accuracy of the model and the loss function, computed both on the training and the dev set.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/model_01.png" alt="Model 01" width="700" /></p>
+<p>The <strong>accuracy</strong> describes the ratio between the correct and the total guesses:</p>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>accuracy = number_of_correct_prediction / total_number_of_prediction_made
+</code></pre></div></div>
+<p>The loss-function correspond to the <strong>binary cross-entropy</strong>, which is given by:</p>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>loss = -(y log(p) + (1-y) log(1-p))
+</code></pre></div></div>
+<p>where <code class="highlighter-rouge">y</code> is the target correct binary label (0 for the right hand, 1 for left hand) and <code class="highlighter-rouge">p</code> is the predicted probability for a given data batch to be a left-hand batch. When the cross-entropy is <em>1</em> the model is useless and it is equivalent to a random guess. When it is <em>0</em> the model perfectly predicts the target given a single data batch.</p>
+
+<h3 id="evaluation-of-the-model---01">Evaluation of the model - 01<a href="#iterations-index">△</a></h3>
+<p>A simple validation of the model can be achieved using the <strong>confusion matrix</strong>, which reports the measure of the correct and non-correct labels computed by the model on the dev set.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/conf_matrix_01.png" alt="Confusion matrix 01" width="300" /></p>
+<p>The model produces a very poor result but pieces of information seem to be present in the data. We can also test the model “live”, loading it and using the script:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">load_model</span>
+<span class="kn">import</span> <span class="nn">win32gui</span><span class="p">,</span> <span class="n">time</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">f</span><span class="s">'../models/model_name.pkl'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="n">X_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetCursorPos</span><span class="p">()</span>
+        <span class="n">X_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">index</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_pred</span>
+
+<span class="n">time_in_sec</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">left_guesses</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_in_sec</span><span class="o">/</span><span class="mi">2</span><span class="p">))):</span>
+    <span class="n">X_pred</span> <span class="o">=</span> <span class="n">get_batch</span><span class="p">()</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_classes</span><span class="p">(</span><span class="n">X_pred</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">left_guesses</span> <span class="o">+=</span> <span class="n">pred</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'</span><span class="se">\r</span><span class="s">Run_{index}: Current prediction = {"Left " if pred else "Right"}   '</span><span class="o">+</span>
+        <span class="n">f</span><span class="s">'Left probability = {left_guesses/index * 100:.1f}</span><span class="si">%   </span><span class="s">'</span><span class="o">+</span>
+        <span class="n">f</span><span class="s">'Right probability = {(1 - left_guesses/index) * 100:.1f}</span><span class="si">%</span><span class="s">'</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">''</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="data-pre-processing---02">Data pre-processing - 02<a href="#iterations-index">△</a></h3>
+<p>An almost useful and safe pre-processing technique on data is their <strong>normalization</strong>. For the moment we used absolute screen coordinate but a very easy improvement is to normalize them by using the screen height and width. Another option is to convert the absolute position of the mouse to the movement performed in 10ms. This might be useful because it simplifies the problem introducing a translational invariance along the coordinate, which looks to be a good symmetry to exploit. We start from this second option:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X_diff</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">X_diff</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">X</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">X_diff</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">X</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div></div>
+<p>At this point it is worthed to look at the relative movement amplitude distribution:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/relative_movement_hist.png" alt="Relative movement distribution" width="600" /></p>
+
+<p>As we can see, the mouse cursor movement in 10ms ranges between 0 and 25 pixels. More importantly, we notice that there is a significant amount of data-point in which the cursor does not move at all. This is due to the fact that during the recording, while reading, the track-pad is untouched. Being this king of data completely irrelevant for the hand recognition problem it is worthed to filter them out to reduce the noise on the dataset:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sigma_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X_diff</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sigma_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X_diff</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">X_filt</span> <span class="o">=</span> <span class="n">X_diff</span><span class="p">[(</span><span class="n">sigma_x</span><span class="o">&gt;</span><span class="mf">0.1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sigma_y</span><span class="o">&gt;</span><span class="mf">0.1</span><span class="p">)]</span>
+</code></pre></div></div>
+
+<p>Finally we normalize the dataset along the <em>x</em> and <em>y</em> direction dividing the dataset by the corresponding standard deviation. This correction is not dynamical but it is calculated statically only once. This is needed because the train/dev/test sets might have different variances, but the correction needs to be always the same:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_std</span> <span class="o">=</span> <span class="mf">3.398</span> <span class="c1"># np.mean(np.std(X_filt[:,:,0], axis=1))
+</span><span class="n">y_std</span> <span class="o">=</span> <span class="mf">2.926</span> <span class="c1"># np.mean(np.std(X_filt[:,:,1], axis=1))
+</span>
+<span class="n">X_filt</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_filt</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">x_std</span>
+<span class="n">X_filt</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_filt</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">y_std</span>
+</code></pre></div></div>
+
+<p>Here is how it looks the movement amplitude distribution after the cleaning and the normalization:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/relative_movement_hist_corrected.png" alt="Relative movement distribution corrected" width="600" /></p>
+<h5 id="evaluation-of-the-model---02">Evaluation of the model - 02<a href="#iterations-index">△</a></h5>
+
+<p>Lets look at the confusion matrix again:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/conf_matrix_02.png" alt="Confusion matrix 02" width="300" /></p>
+<p>The overall accuracy increased a lot from the <em>01-iteration</em>.</p>
+
+<h3 id="algorithm-selection---03">Algorithm selection - 03<a href="#iterations-index">△</a></h3>
+<p>We now want to test different optimizers for the training. Up to now we used Adam with a learning rate of <code class="highlighter-rouge">lr = 0.001</code> and standard beta parameters (<code class="highlighter-rouge">beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0</code>). Before changing the optimizer we want to explore different values for the learning rate. We tested learning rates in the list <code class="highlighter-rouge">[0.01, 0.001, 0.0001, 0.00001]</code>. For each lr we initialize the model five times (changing the random seed) and we averaged the results. The accuracy and the loss function are plotted below:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/model_03_comp.png" alt="Model accuracy loss 03" width="600" /></p>
+<p>The smaller is the learning rate, the smoother is the evolution of the accuracy (and loss function). A learning rate of <code class="highlighter-rouge">0.0001</code> seems to be the best compromise between achieving good results and having a short training time.</p>
+
+<h5 id="evaluation-of-the-model---03index">Evaluation of the model - 03<a href="#iterations-index">index</a></h5>
+<p>To evaluate the model at this point, we used the best learning rate (<code class="highlighter-rouge">lr = 0.0001</code>) and we trained the network for 300 epochs instead of 200.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/model_03.png" alt="Confusion matrix 02" width="700" /></p>
+<p>Here we can recognize the typical pattern of overfitting: the accuracy on the dev set increases until we hit 100 epochs, then it starts to decrease again. The same pattern, although reversed, appears in the loss function. With this model and dataset, we reached an accuracy of about 75%. To try to improve this result we can try different neural network models.</p>
+
+<h3 id="algorithm-selection---04">Algorithm selection - 04<a href="#iterations-index">△</a></h3>
+<p>We now explore the performance differences for different batch sizes. We tested values in <code class="highlighter-rouge">[13, 32, 64]</code> and, for each value, we run the model 9 times using a cross-validation method. The result is showed in the figure below
+:</p>
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/model_04_comp.png" alt="Model accuracy loss 04" width="700" /></p>
+<p>The differences are minimal. We chose a batch size of 32 since it gives better results faster.</p>
+
+<h3 id="algorithm-selection---05">Algorithm selection - 05<a href="#iterations-index">△</a></h3>
+<p>We now test a completely different strategy: using a support vector machine to classify our data. We used a bayesian optimization with cross-validation approach to find the optimal <code class="highlighter-rouge">gamma</code> and <code class="highlighter-rouge">C</code> parameters, but the best accuracy obtained is 62%, which is quite low if compared to the LSTM performance. We, therefore, go back to the recurrent NN strategy.</p>
+
+<h3 id="lstm-size-and-learning-rate-with-bayesopt---06">LSTM size and learning rate with Bayesopt - 06<a href="#iterations-index">△</a></h3>
+<p>We use a Bayesian optimization approach to find the optimal number of neurons in the LSTM network and the optimal learning rate. We select the validation accuracy as the target variable to optimize. On the left, we see the performance estimation for a different number of LSTM neurons, on the x-axis, and for different learning rates, on the y-axis (obtained with a gaussian kernel). On the right panel, we plot the uncertainty of the gaussian model. Look at <a href="https://www.andreaamico.eu/machine_learning/2019/05/08/bayesian_opt.html">this blog post</a> to have a short introduction on how to code Bayesian optimization.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/bayesian_opt.png" alt="bayesian optimization" width="700" /></p>
+<p>The optimal parameters seem to sit between 150 and 250 LSTM neurons, and a learning rate of about 1.5e-4.</p>
+
+<h3 id="introducing-dropout---07">Introducing dropout - 07<a href="#iterations-index">△</a></h3>
+<p>We test if we can reduce the accuracy gap between training and validation by introducting dropout in the LSTM layer:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">LSTM</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s">'LSTM_size'</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">input_shape</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'input_shape'</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">glorot_uniform</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'seed_model'</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'dropout'</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>We use a simple grid search to find the best dropout vs LSTM size.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/LSTM_vs_dropout.png" alt="LSTM dropout" width="350" /></p>
+<p>We do not detect significant improvements introduced by dropout. We confirm that an LSTM of at least 200 units to reach a validation accuracy higher than 70%. For the moment we will remove the dropout regularization from the model.</p>
+
+<h3 id="checking-training-set-size---08">Checking training set size - 08<a href="#iterations-index">△</a></h3>
+<p>To check if the size of the training dataset is limiting the final accuracy we study the validation accuracy by artificially limiting the training set size.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/training_size.png" alt="training size" width="400" /></p>
+<p>Up to 250 batches of training data the model are completely unusable: the efficiency is as good as a random guess. From 250 up to 430 the validation accuracy increases almost linearly and does not seem to saturate. This suggests that we are strongly limited by the size of our training dataset. acquiring more data seems to be a very promising path to improve our accuracy.</p>
+
+<h3 id="new-bigger-dataset---09">New, bigger, dataset - 09<a href="#iterations-index">△</a></h3>
+<p>The previous section told us we need more training points. We constructed a new dataset obtained in a similar way but using a mouse instead of the touchpad. The movements are recorded while playing simple browser games like string.io. The new training size available is now of about 1800 different batches instead of 430. The result is terrible, the validation accuracy is incredibly small even with a git training set, never performing better than 0.6. Maybe the differences in the movements of the left and the right hands, using the mouse, are less sharp than the ones recorded using the touchpad. For the moment we will go back using the old touchpad dataset.</p>
+
+<h3 id="gru-instead-of-lstm---10">GRU instead of LSTM - 10<a href="#iterations-index">△</a></h3>
+<p>A popular variation to the LSTM network is the GRU network (Gated Recurrent Unit), which is generally faster to train. The first impression is very positive: the accuracy is good and looks much more stable. In addition to that, we also add the possibility to introduce a variable number of convolutional layers between the raw data and the GRU unit:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
+
+<span class="kn">from</span> <span class="nn">keras.layers.convolutional</span> <span class="kn">import</span> <span class="n">Conv1D</span>
+<span class="kn">from</span> <span class="nn">keras.layers.convolutional</span> <span class="kn">import</span> <span class="n">MaxPooling1D</span>
+<span class="kn">from</span> <span class="nn">keras.initializers</span> <span class="kn">import</span> <span class="n">glorot_uniform</span>
+
+
+<span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">grid</span><span class="p">[</span><span class="s">'GPU'</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">CuDNNGRU</span>
+        <span class="n">recurrent_unit</span> <span class="o">=</span> <span class="n">CuDNNGRU</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s">'GRU_size'</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                   <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">glorot_uniform</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'seed_model'</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">GRU</span>
+        <span class="n">recurrent_unit</span> <span class="o">=</span> <span class="n">GRU</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s">'GRU_size'</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                   <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">glorot_uniform</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'seed_model'</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                   <span class="n">dropout</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'dropout'</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s">'conv_layers'</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv1D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">))</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">MaxPooling1D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">recurrent_unit</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'sigmoid'</span><span class="p">,</span> <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">glorot_uniform</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="s">'seed_model'</span><span class="p">][</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="k">return</span> <span class="n">model</span>
+</code></pre></div></div>
+
+<p>We start scanning the GRU size parameter, together with the number of convolutional layers:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/conv_layer_number_contourf.png" alt="GRU vs conv layer" width="350" /></p>
+<p>GRU unit size and the number of convolutional layers seem not to affect too much the overall validation accuracy, which is always found between 70 and 75%. To gain more insights on the effect of different network structure we plot the evolution of accuracy and validation accuracy during the training:</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/gru_size_conv_layer.png" alt="GRU size conv layer" width="750" /></p>
+<p>We can see how the training accuracy behaves much better than before, greatly exceeding the 90% limit set by the previous model. At the same time, we notice that the validation accuracy saturates around the epoch 100, at about 70-75%. This seems to be a clear indication of overfitting. Our idea is therefore to introduce some kind of regularization (e.g. dropout).</p>
+
+<p>It is also interesting to isolate the effect of the presence of convolutional layers. In the following plot, we present the validation accuracy during the training for 0, 1, 2 and 3 convolutional layers between the input and the GRU unit.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/conv_layer_number.png" alt="number of convolutional layers" width="750" /></p>
+<p>The presence of convolutional layers seems to increase the learning speed, moreover leads to cleaner results: the thickness of the shadow showing the variance of the signal decreases. For the future, we set the number of convolutional layers to be 3.</p>
+
+<h3 id="gru-and-overfitting---11">GRU and overfitting - 11<a href="#iterations-index">△</a></h3>
+<p>Now the training accuracy is great, but the validation accuracy does not increase more than 70-75%. After around 75 epochs of training, the validation accuracy stops to increase. This is a symptom of overfitting. To try to fix this we changed the GRU unit size (to reduce the complexity of the model) and introduce two dropout steps: recurrent dropout within the GRU layer, and classic dropout in between the convolutional layers. As we can see in the plot below none of these techniques worked out, but actually, reduce the performance of the model.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/model_11_overfit.png" alt="model 11 overfit" width="750" /></p>
+
+<h3 id="gru-with-mouse-movement---12">GRU with mouse movement - 12<a href="#iterations-index">△</a></h3>
+
+<p>Since the bottleneck might still be the training size, we decide to try again our bigger dataset (the one obtained using mouse movements instead of touchpad ones). We study again the accuracy as a function of the training size.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/training_size_mouse.png" alt="training size mouse" width="350" /></p>
+<p>Similarly to the touchpad dataset the accuracy hits its maximum at around 500 batches of training. This time it is clear that having more training datapoints does not improve the performance of the model.</p>
+
+<h3 id="training-size-and-regularizers---13">Training size and regularizers - 13<a href="#iterations-index">△</a></h3>
+
+<p>In the previous section, we realized that we are not limited by the size of the training data. Using the same training dataset we can try to train our model with bigger batches, which effectively reduces the number of batches available. At the same time it will increase the minimum time required for the model to perform a guess: twice the batch size, twice is the recording time needed. Nevertheless, the accuracy might increase.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/batch_size_13.png" alt="batch and training size" width="750" /></p>
+<p>On the most left plot, we see how bigger batch size generally corresponds to an improvement of the model performance. The accuracy saturates around a batch size of 500. On the central plot and on the most right one, we test if the amount of training data is enought even for larger batches. The answer is positive since we observe saturation in both cases. With a batch size of 800, we reach a validation accuracy higher than 80%.</p>
+
+<p>Using a batch size of 800 we try to fill the gap between validation accuracy and training accuracy playing with the GRU unit size, the number of convolutional layers and the l1 regularizer within the GRU unit.</p>
+
+<p style="text-align:center;"><img src="/asset/images/deep_mouse/gru_conv_reg_13.png" alt="gru_size conv regularizer" width="750" /></p>
+<p>None of those methods provide improvements to accuracy. The GRU unit size seems not to affect the accuracy substantially. The number of convolutional layers is relevant, but we were already using 3 of them, which corresponds to the best performance. The l1 regularization technique seems detrimental, always reducing the validation accuracy.</p>
+
+:ET

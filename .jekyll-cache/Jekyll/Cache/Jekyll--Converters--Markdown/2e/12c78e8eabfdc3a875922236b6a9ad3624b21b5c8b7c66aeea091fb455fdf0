@@ -1,0 +1,21 @@
+I" <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">progress_bar</span><span class="p">(</span><span class="n">current_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="n">prog</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_value</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">max_value</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="s">'#'</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">prog</span> <span class="o">*</span> <span class="n">size</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># 0.5 to round up when casting to int
+</span>    <span class="n">right</span> <span class="o">=</span> <span class="s">'-'</span><span class="o">*</span><span class="p">(</span><span class="n">size</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\r</span><span class="s">[{}{}] {:.1f}</span><span class="si">%</span><span class="s">'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">prog</span><span class="o">*</span><span class="mi">100</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s">''</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="c1"># DO YOUR THINGS
+</span>    <span class="n">progress_bar</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="nice-looking-alternative">Nice looking alternative</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)):</span>
+    <span class="c1">### DO YOUR THINGS
+</span></code></pre></div></div>
+
+<p><a href="https://github.com/tqdm/tqdm">Here</a>â€™s the git repository.</p>
+:ET

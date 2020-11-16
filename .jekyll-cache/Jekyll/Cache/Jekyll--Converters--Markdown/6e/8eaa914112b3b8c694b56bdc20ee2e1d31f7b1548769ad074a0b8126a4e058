@@ -1,0 +1,110 @@
+I"ÒD<h3 id="imports-for-jupyter">Imports for jupyter</h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="n">gpd</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">Point</span>
+
+<span class="o">%</span><span class="n">config</span> <span class="n">InlineBackend</span><span class="o">.</span><span class="n">figure_format</span> <span class="o">=</span> <span class="s">'retina'</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+</code></pre></div></div>
+
+<h3 id="geopandas-load-shape-file">Geopandas load shape file</h3>
+
+<p>We can load maps from the geopandas default database <code class="highlighter-rouge">['naturalearth_cities', 'naturalearth_lowres', 'nybb']</code></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">world</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s">'naturalearth_lowres'</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">world</span><span class="p">[</span><span class="n">world</span><span class="o">.</span><span class="n">name</span><span class="o">==</span><span class="s">'Italy'</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">edgecolor</span><span class="o">=</span><span class="s">'black'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+<p style="text-align:center;"><img src="/asset/images/geopandas/italy.png" alt="Italy raw" height="350" /></p>
+
+<p>For higher resulution images a specific shape file is needed. The italian one can be found <a href="https://www.istat.it/it/archivio/124086">here</a>.To import the geopandas dataframe one need fout different files in the same folder: <code class="highlighter-rouge">.dbf</code>, <code class="highlighter-rouge">.prj</code>, <code class="highlighter-rouge">.shx</code> and <code class="highlighter-rouge">.shp</code>. Then, we can load a region dataset as follow:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df_regions</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+    <span class="n">filename</span><span class="o">=</span><span class="s">'../data/Reg2016_ED50/Reg2016_ED50.shp'</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">({</span><span class="s">'init'</span><span class="p">:</span> <span class="s">'epsg:4326'</span><span class="p">})</span>
+
+<span class="c1"># Or by merging different provinces:
+# df_prov = gpd.read_file(
+#    filename='../data/prov_geo/CMProv2016_ED50_g.shp').to_crs({'init': 'epsg:4326'})
+# df_regions = df_prov[['COD_REG', 'SHAPE_Area', 'geometry']].dissolve(
+#                                                 by='COD_REG', aggfunc='sum')
+</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df_regions</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">edgecolor</span><span class="o">=</span><span class="s">'white'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'../plots/italy_reg.png'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s">'tight'</span><span class="p">)</span>
+
+<span class="n">df_regions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+<p style="text-align:center;"><img src="/asset/images/geopandas/head.png" alt="dataframe header" height="100" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/geopandas/italy_reg.png" alt="Italy regions" height="350" /></p>
+
+<h3 id="merging-information-from-pandas-dataframe">Merging information from pandas dataframe</h3>
+
+<p>one can merge information from a different dataframe. Here we will use the map of the italian antennas <a href="http://www.datiopen.it//it/opendata/Mappa_delle_antenne_in_Italia?t=Tabella">downloaded from here</a>. It contains the coordinates of lots of antennas in the italian territory.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df_antennas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'../data/antenne.csv'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">';'</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="s">"ISO-8859-1"</span><span class="p">)</span>
+<span class="n">antennas_position</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+    <span class="n">df_antennas</span><span class="o">.</span><span class="n">Longitudine</span><span class="p">,</span> <span class="n">df_antennas</span><span class="o">.</span><span class="n">Latitudine</span><span class="p">)])</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df_regions</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s">'None'</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s">'black'</span><span class="p">,</span>
+                     <span class="n">zorder</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+
+<span class="n">antennas_position</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'red'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'../plots/italy_antennas.png'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s">'tight'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/geopandas/italy_antennas.png" alt="Italy antennas" height="350" /></p>
+
+<p>We can count the number of antennas contained in each of the italian region:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># this might take a while
+</span><span class="n">df_regions</span><span class="p">[</span><span class="s">'num_antennas'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_regions</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(([</span><span class="n">antenna</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">antenna</span> <span class="ow">in</span> <span class="n">antennas_position</span><span class="p">])))</span>
+
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+
+<span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">viridis</span>
+<span class="n">cmap</span><span class="o">.</span><span class="n">set_over</span><span class="p">(</span><span class="s">'red'</span><span class="p">)</span>
+
+<span class="n">df_regions</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">'num_antennas'</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s">'black'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">antennas_position</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">'black'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<span class="n">cax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+<span class="n">sm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">))</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">_A</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="s">'max'</span><span class="p">)</span>
+<span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">'Number of antennas'</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'../plots/antennas_per_region.png'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s">'tight'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/geopandas/antennas_per_region.png" alt="Italy antennas per region" height="350" /></p>
+
+<p>The same effect can be achieved by joining the two dataframes using a common column. In this case we can exploit the column: <code class="highlighter-rouge">Comune</code>:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df_antennas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'../data/antenne.csv'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">';'</span><span class="p">,</span>  <span class="n">encoding</span> <span class="o">=</span> <span class="s">"ISO-8859-1"</span><span class="p">)</span>
+<span class="n">df_regions</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+    <span class="n">filename</span><span class="o">=</span><span class="s">'../data/Reg2016_ED50/Reg2016_ED50.shp'</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">({</span><span class="s">'init'</span><span class="p">:</span> <span class="s">'epsg:4326'</span><span class="p">})</span>
+
+<span class="n">df_antennas</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s">'Regione'</span><span class="p">:</span>
+                   <span class="p">{</span>
+                       <span class="s">"Valle d'Aosta"</span><span class="p">:</span><span class="s">"Valle D'Aosta"</span><span class="p">,</span>
+                       <span class="s">'Friuli-Venezia Giulia'</span><span class="p">:</span> <span class="s">'Friuli Venezia Giulia'</span>
+                                              
+                   <span class="p">}},</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">df_regions</span> <span class="o">=</span> <span class="n">df_regions</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s">'REGIONE'</span><span class="p">)</span>
+<span class="c1"># df_antennas.set_index('Regione')
+</span>
+<span class="c1"># df_antennas
+</span><span class="n">df_antennas</span><span class="p">[</span><span class="s">'REGIONE'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_antennas</span><span class="o">.</span><span class="n">Regione</span>
+
+<span class="n">df_conbined</span> <span class="o">=</span> <span class="n">df_regions</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_antennas</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s">'REGIONE'</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+</code></pre></div></div>
+
+:ET

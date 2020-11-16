@@ -1,0 +1,34 @@
+I"y<p><code class="highlighter-rouge">increment_filename</code> looks in <code class="highlighter-rouge">path</code> for the file <em>filename.ext</em>  or <em>filename(#any number).ext</em> and return:</p>
+
+<ul>
+  <li><em>filename.ext</em>: if nothing is found</li>
+  <li><em>filename(2).ext</em>: if only <em>filename.ext</em> is found</li>
+  <li><em>filename(<strong>n+1</strong>).ext</em>: if <em>filename(<strong>n</strong>).ext</em> is found (with <strong>n</strong> being the maximum in the folder)</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">def</span> <span class="nf">increment_filename</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+    <span class="n">regex_pattern</span> <span class="o">=</span> <span class="s">'(?&lt;=</span><span class="err">\</span><span class="s">()(</span><span class="err">\</span><span class="s">d+)(?=</span><span class="err">\</span><span class="s">)</span><span class="err">\</span><span class="s">.'</span><span class="o">+</span><span class="n">ext</span><span class="o">+</span><span class="s">'$)'</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s">"(*)."</span><span class="o">+</span><span class="n">ext</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">new_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">regex_pattern</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">new_complete_path</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex_pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_count</span><span class="p">),</span> <span class="n">files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">single</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s">'.'</span><span class="o">+</span><span class="n">ext</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">single</span><span class="p">:</span>
+            <span class="n">new_complete_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s">'(2).'</span><span class="o">+</span><span class="n">ext</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_complete_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s">'.'</span><span class="o">+</span><span class="n">ext</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_complete_path</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">new_path</span> <span class="o">=</span> <span class="n">increment_filename</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s">"my_path"</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">"my_file"</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s">"txt"</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">new_path</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s">"I am a really nice file!!!"</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></code></pre></figure>
+
+:ET

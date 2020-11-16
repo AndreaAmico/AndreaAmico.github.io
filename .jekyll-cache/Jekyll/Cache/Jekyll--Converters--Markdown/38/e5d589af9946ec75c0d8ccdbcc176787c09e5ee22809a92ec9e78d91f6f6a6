@@ -1,0 +1,174 @@
+I"m*<p>Findall method returns a list of the strings containing the matches:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">my_string</span> <span class="o">=</span> <span class="s">"My emails are xyz@mail.xor and zyx@liam.rox"</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">email</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">"</span><span class="err">\</span><span class="s">S+@</span><span class="err">\</span><span class="s">S+"</span><span class="p">,</span> <span class="n">my_string</span><span class="p">)):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Email {}: {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">email</span><span class="p">))</span></code></pre></figure>
+
+<p>Email 0: xyz@mail.xor
+Email 1: zyx@liam.rox</p>
+
+<p>If the position is needed as well one can use finditer. It returns a list of <code class="highlighter-rouge">re.MatchObject</code> objects.
+The main methods are <code class="highlighter-rouge">.group(group_index)</code>, that returns the matched string, <code class="highlighter-rouge">.start(group_index)</code>,
+that returns the position of the first character of the matched string in the original string, and <code class="highlighter-rouge">.end(group_index)</code>.
+<code class="highlighter-rouge">group_index</code> is needed when more than one parentheses () is used.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">email</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="s">"</span><span class="err">\</span><span class="s">S+@</span><span class="err">\</span><span class="s">S+"</span><span class="p">,</span> <span class="n">my_string</span><span class="p">)):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Email {}: {}, starts at position: {} and ends at position: {}"</span>
+        <span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">email</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">email</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">email</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span></code></pre></figure>
+
+<p>Email 0: xyz@mail.xor, starts at position: 14 and ends at position: 26
+Email 1: zyx@liam.rox, starts at position: 31 and ends at position: 43</p>
+
+<hr />
+
+<ul>
+  <li>(?=<strong>foo</strong>): lookahead (asserts that what immediately follows the current position in the string is <strong>foo</strong>)</li>
+  <li>(?&lt;=<strong>foo</strong>): lookbehind (asserts that what immediately precedes the current position in the string is foo**)</li>
+  <li>(?!<strong>foo</strong>):  negative lookahead (asserts that what immediately follows the current position in the string is not <strong>foo</strong>)</li>
+  <li>(?&lt;!<strong>foo</strong>): negative lookbehind (asserts that what immediately precedes the current position in the string is not <strong>foo</strong>)</li>
+</ul>
+
+<p>Example:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">'(?&lt;=</span><span class="err">\</span><span class="s">()(</span><span class="err">\</span><span class="s">d+)(?=</span><span class="err">\</span><span class="s">)</span><span class="err">\</span><span class="s">.txt$)'</span><span class="p">,</span> <span class="s">'6'</span><span class="p">,</span> <span class="s">'my_file(5).txt'</span><span class="p">)</span></code></pre></figure>
+
+<p>returns <em>‘my_file(6).txt’</em>.</p>
+
+<hr />
+<p>A good cheat sheet by <a href="https://github.com/tartley/python-regex-cheatsheet" title="https://github.com/tartley/python-regex-cheatsheet">tartley</a> is reported here:</p>
+
+<p>Non-special chars match themselves. Exceptions are special characters:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\       Escape special char or start a sequence.
+.       Match any char except newline, see re.DOTALL
+^       Match start of the string, see re.MULTILINE
+$       Match end of the string, see re.MULTILINE
+[]      Enclose a set of matchable chars
+R|S     Match either regex R or regex S.
+()      Create capture group, &amp; indicate precedence
+</code></pre></div></div>
+
+<p>After ‘<code class="highlighter-rouge">[</code>’, enclose a set, the only special chars are:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>]   End the set, if not the 1st char
+-   A range, eg. a-c matches a, b or c
+^   Negate the set only if it is the 1st char
+</code></pre></div></div>
+
+<p>Quantifiers (append ‘<code class="highlighter-rouge">?</code>’ for non-greedy):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{m}     Exactly m repetitions
+{m,n}   From m (default 0) to n (default infinity)
+*       0 or more. Same as {,}
++       1 or more. Same as {1,}
+?       0 or 1. Same as {,1}
+</code></pre></div></div>
+
+<p>Special sequences:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\A  Start of string
+\b  Match empty string at word (\w+) boundary
+\B  Match empty string not at word boundary
+\d  Digit
+\D  Non-digit
+\s  Whitespace [ \t\n\r\f\v], see LOCALE,UNICODE
+\S  Non-whitespace
+\w  Alphanumeric: [0-9a-zA-Z_], see LOCALE
+\W  Non-alphanumeric
+\Z  End of string
+\g&lt;id&gt;  Match prev named or numbered group,
+        '&lt;' &amp; '&gt;' are literal, e.g. \g&lt;0&gt;
+        or \g&lt;name&gt; (not \g0 or \gname)
+</code></pre></div></div>
+
+<p>Special character escapes are much like those already escaped in Python string
+literals. Hence regex ‘<code class="highlighter-rouge">\n</code>’ is same as regex ‘<code class="highlighter-rouge">\\n</code>’:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\a  ASCII Bell (BEL)
+\f  ASCII Formfeed
+\n  ASCII Linefeed
+\r  ASCII Carriage return
+\t  ASCII Tab
+\v  ASCII Vertical tab
+\\  A single backslash
+\xHH   Two digit hexadecimal character goes here
+\OOO   Three digit octal char (or just use an
+       initial zero, e.g. \0, \09)
+\DD    Decimal number 1 to 99, match
+       previous numbered group
+</code></pre></div></div>
+
+<p>Extensions. Do not cause grouping, except ‘<code class="highlighter-rouge">P&lt;name&gt;</code>’:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(?iLmsux)     Match empty string, sets re.X flags
+(?:...)       Non-capturing version of regular parens
+(?P&lt;name&gt;...) Create a named capturing group.
+(?P=name)     Match whatever matched prev named group
+(?#...)       A comment; ignored.
+(?=...)       Lookahead assertion, match without consuming
+(?!...)       Negative lookahead assertion
+(?&lt;=...)      Lookbehind assertion, match if preceded
+(?&lt;!...)      Negative lookbehind assertion
+(?(id)y|n)    Match 'y' if group 'id' matched, else 'n'
+</code></pre></div></div>
+
+<p>Flags for re.compile(), etc. Combine with <code class="highlighter-rouge">'|'</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>re.I == re.IGNORECASE   Ignore case
+re.L == re.LOCALE       Make \w, \b, and \s locale dependent
+re.M == re.MULTILINE    Multiline
+re.S == re.DOTALL       Dot matches all (including newline)
+re.U == re.UNICODE      Make \w, \b, \d, and \s unicode dependent
+re.X == re.VERBOSE      Verbose (unescaped whitespace in pattern
+                        is ignored, and '#' marks comment lines)
+</code></pre></div></div>
+
+<p>Module level functions:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>compile(pattern[, flags]) -&gt; RegexObject
+match(pattern, string[, flags]) -&gt; MatchObject
+search(pattner, string[, flags]) -&gt; MatchObject
+findall(pattern, string[, flags]) -&gt; list of strings
+finditer(pattern, string[, flags]) -&gt; iter of MatchObjects
+split(pattern, string[, maxsplit, flags]) -&gt; list of strings
+sub(pattern, repl, string[, count, flags]) -&gt; string
+subn(pattern, repl, string[, count, flags]) -&gt; (string, int)
+escape(string) -&gt; string
+purge() # the re cache
+</code></pre></div></div>
+
+<p>RegexObjects (returned from <code class="highlighter-rouge">compile()</code>):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.match(string[, pos, endpos]) -&gt; MatchObject
+.search(string[, pos, endpos]) -&gt; MatchObject
+.findall(string[, pos, endpos]) -&gt; list of strings
+.finditer(string[, pos, endpos]) -&gt; iter of MatchObjects
+.split(string[, maxsplit]) -&gt; list of strings
+.sub(repl, string[, count]) -&gt; string
+.subn(repl, string[, count]) -&gt; (string, int)
+.flags      # int, Passed to compile()
+.groups     # int, Number of capturing groups
+.groupindex # {}, Maps group names to ints
+.pattern    # string, Passed to compile()
+</code></pre></div></div>
+
+<p>MatchObjects (returned from <code class="highlighter-rouge">match()</code> and <code class="highlighter-rouge">search()</code>):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.expand(template) -&gt; string, Backslash &amp; group expansion
+.group([group1...]) -&gt; string or tuple of strings, 1 per arg
+.groups([default]) -&gt; tuple of all groups, non-matching=default
+.groupdict([default]) -&gt; {}, Named groups, non-matching=default
+.start([group]) -&gt; int, Start/end of substring match by group
+.end([group]) -&gt; int, Group defaults to 0, the whole match
+.span([group]) -&gt; tuple (match.start(group), match.end(group))
+.pos       int, Passed to search() or match()
+.endpos    int, "
+.lastindex int, Index of last matched capturing group
+.lastgroup string, Name of last matched capturing group
+.re        regex, As passed to search() or match()
+.string    string, "
+</code></pre></div></div>
+:ET

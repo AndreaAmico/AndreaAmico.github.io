@@ -1,0 +1,46 @@
+I"”<h2 id="setup-python-environment-ubuntu-2004">Setup python environment (Ubuntu 20.04)</h2>
+
+<p>Get <code class="highlighter-rouge">pip</code> and <code class="highlighter-rouge">virtualenv</code> installed:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>python3-pip
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>python3-venv
+</code></pre></div></div>
+<p>Create a new environment and activate it:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-m</span> venv tf
+<span class="nb">source </span>tf/bin/activate
+</code></pre></div></div>
+
+<p>Install the <code class="highlighter-rouge">tensorflow</code> library and, if needed, <code class="highlighter-rouge">opencv</code>:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>tensorflow
+pip <span class="nb">install </span>opencv-contrib-python
+</code></pre></div></div>
+
+<h2 id="tensorflow-lite">Tensorflow lite</h2>
+<p>If there is no need to train models, a tansorflow lite environment can be used by itself. One needs to select the correct version from <a href="https://www.tensorflow.org/lite/guide/python">this list</a> and install it. For example on Ubuntu 20.04 64bit:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip3 <span class="nb">install </span>https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_x86_64.whl
+</code></pre></div></div>
+
+<p>The tensorflow interpreter can now be used as follows:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">tflite_runtime.interpreter</span> <span class="k">as</span> <span class="n">tflite</span>
+<span class="n">interpreter</span> <span class="o">=</span> <span class="n">tflite</span><span class="o">.</span><span class="n">Interpreter</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">model_file</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="coral-usb-accelerator">Coral usb accelerator</h2>
+<p>First install the coral dependencies:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nb">install </span>curl
+
+<span class="nb">echo</span> <span class="s2">"deb https://packages.cloud.google.com/apt coral-edgetpu-stable main"</span> | <span class="nb">sudo tee</span> /etc/apt/sources.list.d/coral-edgetpu.list
+
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | <span class="nb">sudo </span>apt-key add -
+
+<span class="nb">sudo </span>apt-get update
+</code></pre></div></div>
+
+<p>Finally install the coral library. There are two version available, the <strong>standard</strong> and the <strong>max</strong> version, which is faster but the usb device gets hot really fast. <strong>NB: only one version can be installed in the system. Installing a different one will override the previous.</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># standard:</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>libedgetpu1-std
+
+<span class="c"># max:</span>
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>libedgetpu1-max
+</code></pre></div></div>
+:ET

@@ -1,0 +1,56 @@
+I"ò<h2 id="file-managing">File managing</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ls</span>  <span class="nt">-a</span> <span class="o">(</span>includes hidden<span class="o">)</span>
+    <span class="nt">-d</span> <span class="o">(</span>directories<span class="o">)</span>
+    <span class="nt">-ls</span> <span class="o">(</span>details + size<span class="o">)</span>
+    <span class="nt">-R</span> <span class="o">(</span>recursive directories<span class="o">)</span>
+
+<span class="nb">cp</span>  <span class="nt">-n</span> <span class="o">(</span>no overwrite file<span class="o">)</span>
+    <span class="nt">-R</span> <span class="o">(</span>recursive copy<span class="o">)</span>
+
+<span class="nb">mv</span>  <span class="o">(</span>move and rename<span class="o">)</span>
+    <span class="nt">-f</span> <span class="o">(</span>transfer large files<span class="o">)</span>
+
+<span class="nb">mkdir
+rmdir</span>
+</code></pre></div></div>
+
+<h2 id="processes">Processes</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps  <span class="nt">-aux</span> <span class="o">(</span>show all with details<span class="o">)</span>
+    <span class="nt">-a</span> <span class="o">(</span>show except group leader<span class="o">)</span>
+
+<span class="nb">kill</span> <span class="nt">-9</span> PROCESS_PID
+     <span class="nt">-l</span> <span class="o">(</span>list of <span class="nb">kill </span>signals<span class="o">)</span>
+
+which EXECUTABLE_FILE_NAME <span class="o">(</span>locate file<span class="o">)</span> 
+
+</code></pre></div></div>
+
+<h2 id="files">Files</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nb">touch
+
+cat </span>FILENAME <span class="o">(</span>display file content<span class="o">)</span>
+<span class="nb">cat</span> <span class="o">&gt;</span>FILENAME <span class="o">(</span>create file called FILENAME waits <span class="k">for </span>input, ends with ctrl+d<span class="o">)</span>
+less FILENAME <span class="o">(</span>navigate large files, <span class="nb">exit </span>using q<span class="o">)</span>
+</code></pre></div></div>
+
+<h2 id="others">Others</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lsusb <span class="o">(</span>list usb devices<span class="o">)</span>
+cmp FILE1 FILE2 <span class="o">(</span>check <span class="k">if </span>files are different, no output is equal<span class="o">)</span>
+<span class="nb">alias </span><span class="nv">CMDNAME</span><span class="o">=</span><span class="s1">'NEW COMMAND'</span>
+cal <span class="o">(</span>calendar<span class="o">)</span>
+<span class="nb">history
+chmod </span>XYZ FILENAME <span class="o">(</span><span class="nv">X</span><span class="o">=</span>user, <span class="nv">Y</span><span class="o">=</span>group, <span class="nv">Z</span><span class="o">=</span>other, assigned as a <span class="nb">sum </span>of permission<span class="o">)</span>
+        0:<span class="s2">"no permission"</span>
+        1:<span class="s2">"execute permission"</span>
+        2:<span class="s2">"write permission"</span>
+        4:<span class="s2">"read permission"</span>
+
+        example: <span class="s2">"sudo chmod 777 MYFILE"</span> <span class="o">(</span>grant all permissions <span class="k">for </span>all <span class="nb">users</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h2 id="caps-to-backslash">Caps to backslash</h2>
+<p>Add to <code class="highlighter-rouge">startup applications</code>:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>setxkbmap <span class="nt">-option</span> caps:backspace
+</code></pre></div></div>
+:ET

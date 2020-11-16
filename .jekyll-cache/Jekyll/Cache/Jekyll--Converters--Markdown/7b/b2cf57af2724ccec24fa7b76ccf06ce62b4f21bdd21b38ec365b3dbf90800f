@@ -1,0 +1,489 @@
+I"J�<h3 id="dataframe">DataFrame</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## SERIES
+</span><span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mf">7.8</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">,</span> <span class="mf">10.5</span><span class="p">])</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mf">7.8</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">'bronze'</span><span class="p">,</span> <span class="s">'gold'</span><span class="p">,</span> <span class="s">'iron'</span><span class="p">])</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s">'bronze'</span><span class="p">:</span><span class="mf">7.8</span><span class="p">,</span> <span class="s">'gold'</span><span class="p">:</span><span class="mf">19.3</span><span class="p">})</span>
+<span class="c1">#index=['gold', 'silver'] -&gt; drop 'bronze' and assigns NaN to silver
+</span></code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">'val'</span><span class="p">:[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span>
+                   <span class="s">'patient_id'</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+                   <span class="s">'name'</span><span class="p">:[</span><span class="s">'Alice'</span><span class="p">,</span> <span class="s">'Bob'</span><span class="p">,</span> <span class="s">'Charlie'</span><span class="p">,</span> <span class="s">'Devil'</span><span class="p">]})</span>
+
+<span class="n">df</span><span class="p">[[</span><span class="s">'patient_id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">,</span> <span class="s">'val'</span><span class="p">]]</span> <span class="c1"># changing order
+</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span> <span class="c1"># column names, column data types
+</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">'name'</span><span class="p">]</span> <span class="c1"># get column as pd.Series (as a poiter)
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s">'name'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># get column as pd.DataFrame (as a copy)
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># get first row as pd.Series (as a poiter)
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span> <span class="c1"># get all the DataFrame as a simple numpy array
+</span>
+<span class="n">df</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s">'columns'</span><span class="p">)</span> <span class="c1"># or 'rows'
+</span>
+<span class="n">df</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># -&gt; (4, 3) : (number of rows, number of columns)
+</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># get head or tail
+</span>
+<span class="n">df</span><span class="p">[</span><span class="s">'year'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2019</span> <span class="c1"># or[2019, 2019, 2020, 2020] add a new column (must match len)
+</span><span class="n">df</span><span class="p">[</span><span class="s">'year'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="s">'a'</span><span class="p">,</span> <span class="s">'b'</span><span class="p">,</span> <span class="s">'c'</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span> <span class="c1"># ok (fills with NaN and 'c' is dropped)
+</span>
+<span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s">'year'</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># drop column
+</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># drop row
+</span></code></pre></div></div>
+
+<h3 id="load-data">Load data</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pd</span><span class="o">.</span><span class="n">read_clipboard</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s">'</span><span class="err">\</span><span class="s">s</span><span class="err">\</span><span class="s">s+'</span><span class="p">)</span> <span class="c1"># read from clipboard!
+</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># default header is 0, 
+</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">'</span><span class="err">\</span><span class="s">s+'</span><span class="p">)</span> <span class="c1"># sep can be RegEx (any number of spaces)
+</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s">'id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">])</span> <span class="c1"># set colums as index
+</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#import only first 2 rows (+ header)
+</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'foo.csv'</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s">'year'</span><span class="p">])</span>
+
+<span class="n">data_chunks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'filename.csv'</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">data_chunks</span><span class="o">.</span><span class="n">get_chunk</span><span class="p">()</span> <span class="c1"># or iterate over chunks with a for loop
+</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'f.csv'</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s">'?'</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">])</span> <span class="c1"># fills with NaNs
+</span></code></pre></div></div>
+
+<h3 id="indexing">Indexing</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'foo.csv'</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s">'id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">])</span> <span class="c1"># set colums as index
+</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">'id'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s">'name'</span><span class="p">]</span>
+<span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_unique</span> <span class="c1"># if False df.loc may rerturns multiple Series
+</span>
+<span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># reverse (or change) order of rows
+</span><span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">fill_value</span><span class="o">=</span><span class="s">'hey'</span><span class="p">)</span> <span class="c1"># force new index and fill up missings
+</span><span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s">'ffill'</span><span class="p">)</span> <span class="c1"># fill up with selected method
+</span><span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># sort row indexes
+</span><span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># sort columns indexes
+</span>
+<span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s">'id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">])</span> <span class="c1"># hierarchical indexing
+</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="s">'bob'</span><span class="p">)]</span> <span class="c1"># access hierarchical indexing
+</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># indexing by column number
+</span><span class="n">df</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># from rows to columns
+</span><span class="n">df</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># from columns to rows
+</span>
+<span class="c1">## Flatten a hierarchical index in columns
+</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">'_'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+<span class="c1"># flatten the index if the df is obtained by grouping: df = df.reset_index()
+</span></code></pre></div></div>
+
+<h3 id="selection">Selection</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">s</span><span class="p">[:</span><span class="s">'charlie'</span><span class="p">]</span> <span class="c1"># numpy slicing or slicing with labels
+</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s">'id&gt;2'</span><span class="p">)</span> <span class="c1"># equivalent to df[df['id']&gt;2]
+</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s">'id &gt; @variable'</span><span class="p">)</span> <span class="c1"># use @ to use a variable in the current namespace
+</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s">'id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">]]</span> <span class="c1"># get a row as a Series
+</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s">'row_start'</span><span class="p">:</span><span class="s">'row_end'</span><span class="p">,</span> <span class="s">'col_start'</span><span class="p">:</span><span class="s">'col_end'</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h3 id="timeseries">TimeSeries</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'foo.csv'</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s">'year'</span><span class="p">])</span>
+<span class="n">df</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="c1"># format='%Y-%m-%d'
+</span><span class="n">df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s">'10AS'</span><span class="p">)</span> <span class="c1">#resample every decade
+</span>
+<span class="c1">## set date as index
+</span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s">'date'</span><span class="p">)</span>
+
+<span class="c1">## if date is the index:
+</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># get the average in Genuary
+</span><span class="n">df</span><span class="p">[</span><span class="s">'2015-02-25'</span><span class="p">:</span><span class="s">'2015:02-27'</span><span class="p">]</span> <span class="c1"># select range of dates
+</span>
+<span class="c1"># Fill up missing dates
+</span><span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s">'01-01-2017'</span><span class="p">,</span> <span class="s">'01-11-2017'</span><span class="p">)</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+</code></pre></div></div>
+<h4 id="resample-strings">Resample strings</h4>
+
+<table>
+  <tbody>
+    <tr>
+      <td>BusinessDay</td>
+      <td>‘B’</td>
+      <td>business day (weekday)</td>
+    </tr>
+    <tr>
+      <td>Week</td>
+      <td>‘W’</td>
+      <td>one week</td>
+    </tr>
+    <tr>
+      <td>MonthEnd</td>
+      <td>‘M’</td>
+      <td>calendar month end</td>
+    </tr>
+    <tr>
+      <td>MonthBegin</td>
+      <td>‘MS’</td>
+      <td>calendar month begin</td>
+    </tr>
+    <tr>
+      <td>BusinessMonthBegin</td>
+      <td>‘BMS’</td>
+      <td>business month begin</td>
+    </tr>
+    <tr>
+      <td>YearEnd</td>
+      <td>‘A’</td>
+      <td>calendar year end</td>
+    </tr>
+    <tr>
+      <td>YearBegin</td>
+      <td>‘AS’ or ‘BYS’</td>
+      <td>calendar year begin</td>
+    </tr>
+    <tr>
+      <td>BYearEnd</td>
+      <td>‘BA’</td>
+      <td>business year end</td>
+    </tr>
+    <tr>
+      <td>BYearBegin</td>
+      <td>‘BAS’</td>
+      <td>business year begin</td>
+    </tr>
+    <tr>
+      <td>Easter</td>
+      <td>None</td>
+      <td>Easter holiday</td>
+    </tr>
+    <tr>
+      <td>CustomBusinessHour</td>
+      <td>‘CBH’</td>
+      <td>custom business hour</td>
+    </tr>
+    <tr>
+      <td>Day</td>
+      <td>‘D’</td>
+      <td>one absolute day</td>
+    </tr>
+    <tr>
+      <td>Hour</td>
+      <td>‘H’</td>
+      <td>one hour</td>
+    </tr>
+    <tr>
+      <td>Minute</td>
+      <td>‘T’ or ‘min’</td>
+      <td>one minute</td>
+    </tr>
+    <tr>
+      <td>Second</td>
+      <td>‘S’</td>
+      <td>one second</td>
+    </tr>
+    <tr>
+      <td>Milli</td>
+      <td>‘L’ or ‘ms’</td>
+      <td>one millisecond</td>
+    </tr>
+    <tr>
+      <td>Micro</td>
+      <td>‘U’ or ‘us’</td>
+      <td>one microsecond</td>
+    </tr>
+    <tr>
+      <td>Nano</td>
+      <td>‘N’</td>
+      <td>one nanosecond</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br /></p>
+
+<h4 id="datetime-string-format">Datetime string format</h4>
+
+<table>
+  <tbody>
+    <tr>
+      <td>%a</td>
+      <td>: : Locale’s abbreviated weekday name.</td>
+    </tr>
+    <tr>
+      <td>%A</td>
+      <td>: : Locale’s full weekday name.</td>
+    </tr>
+    <tr>
+      <td>%b</td>
+      <td>: : Locale’s abbreviated month name.</td>
+    </tr>
+    <tr>
+      <td>%B</td>
+      <td>: : Locale’s full month name.</td>
+    </tr>
+    <tr>
+      <td>%c</td>
+      <td>: : Locale’s appropriate date and time representation.</td>
+    </tr>
+    <tr>
+      <td>%d</td>
+      <td>: : Day of the month as a decimal number [01,31].</td>
+    </tr>
+    <tr>
+      <td>%f</td>
+      <td>: : Microsecond as a decimal number [0,999999], zero-padded on the left</td>
+    </tr>
+    <tr>
+      <td>%H</td>
+      <td>: : Hour (24-hour clock) as a decimal number [00,23].</td>
+    </tr>
+    <tr>
+      <td>%I</td>
+      <td>: : Hour (12-hour clock) as a decimal number [01,12].</td>
+    </tr>
+    <tr>
+      <td>%j</td>
+      <td>: : Day of the year as a decimal number [001,366].</td>
+    </tr>
+    <tr>
+      <td>%m</td>
+      <td>: : Month as a decimal number [01,12].</td>
+    </tr>
+    <tr>
+      <td>%M</td>
+      <td>: : Minute as a decimal number [00,59].</td>
+    </tr>
+    <tr>
+      <td>%p</td>
+      <td>: : Locale’s equivalent of either AM or PM.</td>
+    </tr>
+    <tr>
+      <td>%S</td>
+      <td>: : Second as a decimal number [00,61].</td>
+    </tr>
+    <tr>
+      <td>%U</td>
+      <td>: : Week number of the year (Sunday as the first day of the week)</td>
+    </tr>
+    <tr>
+      <td>%w</td>
+      <td>: : Weekday as a decimal number [0(Sunday),6].</td>
+    </tr>
+    <tr>
+      <td>%W</td>
+      <td>: : Week number of the year (Monday as the first day of the week)</td>
+    </tr>
+    <tr>
+      <td>%x</td>
+      <td>: : Locale’s appropriate date representation.</td>
+    </tr>
+    <tr>
+      <td>%X</td>
+      <td>: : Locale’s appropriate time representation.</td>
+    </tr>
+    <tr>
+      <td>%y</td>
+      <td>: : Year without century as a decimal number [00,99].</td>
+    </tr>
+    <tr>
+      <td>%Y</td>
+      <td>: : Year with century as a decimal number.</td>
+    </tr>
+    <tr>
+      <td>%z</td>
+      <td>: : UTC offset in the form +HHMM or -HHMM.</td>
+    </tr>
+    <tr>
+      <td>%Z</td>
+      <td>: : Time zone name (empty string if the object is naive).</td>
+    </tr>
+    <tr>
+      <td>%%</td>
+      <td>: : A literal ‘%’ character.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br /></p>
+
+<h3 id="clean">Clean</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span> <span class="c1"># how='all' if all the fields are missing, thres=2 if at least two good
+</span><span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">({</span><span class="s">'id'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">'name'</span><span class="p">:</span> <span class="s">'unknown'</span><span class="p">})</span> <span class="c1"># or just df.fillna(-999) or by interpolation method='bfill'
+</span><span class="n">df</span><span class="o">.</span><span class="p">[</span><span class="s">'age'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="p">[</span><span class="s">'age'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># fix a signle column
+</span><span class="n">df</span><span class="o">.</span><span class="n">interpolate</span><span class="p">()</span> <span class="c1"># linear interpolation on missing data
+</span>
+<span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s">'col_name1'</span><span class="p">:{</span>
+                <span class="s">'replace this'</span><span class="p">:</span><span class="s">'with_this'</span><span class="p">,</span>
+                <span class="s">'that'</span><span class="p">:</span><span class="s">'with 0'</span><span class="p">}</span>
+            <span class="s">'col_name2'</span><span class="p">:{</span><span class="o">...</span><span class="p">}})</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'[A-Za-z]'</span><span class="p">,</span> <span class="s">''</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="s">'poor'</span><span class="p">,</span> <span class="s">'good'</span><span class="p">,</span> <span class="s">'amazing'</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h3 id="explore">Explore</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span> <span class="c1"># include='all' describes non-numeric as well
+</span><span class="n">df</span><span class="p">[[</span><span class="s">'name'</span><span class="p">,</span><span class="s">'id'</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">],</span> <span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s">'id'</span><span class="p">,</span> <span class="s">'name'</span><span class="p">])</span>
+<span class="n">s</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span> <span class="c1"># number of non NaN items
+</span><span class="n">df</span><span class="o">.</span><span class="n">col_name</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="c1"># number of unique values
+</span>
+</code></pre></div></div>
+
+<h3 id="grouping">Grouping</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s">'col_name'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">group_element_name</span><span class="p">,</span> <span class="n">group_element_df</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="s">'group name'</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># or sum or plot 
+</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s">'date'</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s">'city'</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s">'temperature'</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s">'date'</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s">'city'</span><span class="p">,</span> <span class="n">aggfunc</span><span class="o">=</span><span class="s">'mean'</span><span class="p">)</span> <span class="c1">#margins=True
+</span><span class="n">df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Grouper</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s">'M'</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s">'date'</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="s">'temperature'</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s">'keep_col_1'</span><span class="p">,</span> <span class="s">'keep_col_2'</span><span class="o">..</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s">'var_name'</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s">'value_name'</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">cross_tab</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">job_title</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">gender</span><span class="p">,</span> <span class="n">aggfunc</span><span class="o">=</span><span class="s">'count'</span><span class="p">)</span> <span class="c1"># margins=True, normalize='index'
+</span>
+<span class="c1"># Resampling non-timeseries data
+</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">WINDOW_SIZE</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+</code></pre></div></div>
+
+<h3 id="join">Join</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s">'columns'</span><span class="p">)</span> <span class="c1"># concat with reindexing
+</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s">'df1_key_name'</span><span class="p">,</span> <span class="s">'df2_key_name'</span><span class="p">])</span> <span class="c1"># concat with reindexing
+</span>
+<span class="c1"># inner-&gt;intersection, outer-&gt;union, left-&gt;left+intersection, right
+</span><span class="n">df_left</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_right</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s">'inner'</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s">'_left'</span><span class="p">,</span> <span class="s">'_right'</span><span class="p">))</span>
+<span class="n">df_left</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_right</span><span class="p">,</span> <span class="n">indicator</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># add column with merging specifications
+</span>
+</code></pre></div></div>
+
+<h3 id="sql">SQL</h3>
+<p><a href="#dataframe">DataFrames</a> |
+<a href="#load-data">Load Data</a> |
+<a href="#indexing">Indexing</a> |
+<a href="#selection">Selection</a> |
+<a href="#timeseries">Timeseries</a> |
+<a href="#clean">Clean</a> |
+<a href="#explore">Explore</a> |
+<a href="#grouping">Grouping</a> |
+<a href="#join">Join</a> |
+<a href="#sql">SQL</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pymysql</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span>
+
+<span class="n">eng</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">create_engine</span><span class="p">(</span><span class="s">'mysql+pymysql://root:psw@localhost:3306/dbname'</span><span class="p">)</span>
+<span class="n">eng</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">'DROP TABLE table_name_to_drop'</span><span class="p">)</span>
+
+<span class="c1">#db type (can be 'oracle://'), user, psw, host name, port, database name
+</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_table</span><span class="p">(</span><span class="s">'table_name'</span><span class="p">,</span> <span class="n">eng</span><span class="p">)</span> <span class="c1"># columns=['col1', 'col2', ..]
+</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="s">'''
+    SELECT users.name, users.email, orders.name
+    FROM users INNER JOIN orders
+    ON users.id = orders.id
+'''</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">eng</span><span class="p">)</span> <span class="c1"># chunksize.. for large amount of data
+</span>
+</code></pre></div></div>
+
+:ET

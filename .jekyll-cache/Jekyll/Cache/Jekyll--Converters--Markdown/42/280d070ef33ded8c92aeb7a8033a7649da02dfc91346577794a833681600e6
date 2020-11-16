@@ -1,0 +1,349 @@
+I"��<p style="text-align:center;"><img src="/asset/images/xray/intro.png" alt="xray example" width="300" /></p>
+
+<h3 id="problem-definition">Problem definition</h3>
+
+<p>In this post, we will approach the problem of image segmentation using the pneumothorax dataset from <a href="https://www.kaggle.com/c/siim-acr-pneumothorax-segmentation">kaggle</a>. The problem is straightforward: given an x-ray image of the patient’s chest, you need to detect the presence of pneumothorax issue and spatially locate the region of interest within the image. You are provided with around 100000 x-ray images for training. Each of them comes with a spatial mask locating the pneumothorax problem in the image (if the lung is healthy the mask is just empty). An example of an x-ray image is shown above: the right lung has complications in the top external region.</p>
+
+<h3 id="neural-network-model">Neural network model</h3>
+
+<p>We choose to approach this problem using a convolutional neural network (the good old friend of image analysis). Instead of training a network from scratch we decided to exploit the VGG-16 network model, pre-trained on the <a href="http://www.image-net.org/">imagenet</a> dataset. The idea is to exploit the first layers of this network, which are already trained to “understand” the very low-level features of an image, such as edges and extremely simple patterns. Since the imagenet dataset contains more than 14 million images, we want to exploit the ability of the trained VGG-16 network to extract the most important low lever features from an image and transfer this “knowledge” to our problem.</p>
+
+<p>Since we are interested in finding the position of the possible lung problem, it makes sense not to exit from the convolutional network structure using dense layers. Instead, one can use a U-type network, similar to the one used in autoencoders: in the first section of the network, we extract the most important features by applying convolutional layers and max-pooling to reduce the size of the image representation and increase the number of channels. In the second half, instead, we use a combination of up-sampling and convolutional layers to reduce the number of channels to just one and increase the image representation size back to the original one.</p>
+
+<h3 id="importing-the-images">Importing the images</h3>
+
+<p>First of all, we need to import the training dataset and split it into train/dev/test sets. Here we create two lists containing the file paths of the training images together with the respective mask. Moreover, we shuffle these lists and we split them in train/dev/test with a proportion of 250/40/40.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">xray_path</span> <span class="o">=</span> <span class="n">f</span><span class="s">'{root_path}data/train/*'</span>
+<span class="n">mask_path</span> <span class="o">=</span> <span class="n">f</span><span class="s">'{root_path}data/masks/*'</span>
+<span class="n">xray_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">xray_path</span><span class="p">))</span>
+<span class="n">mask_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">mask_path</span><span class="p">))</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xray_files</span><span class="p">,</span> <span class="n">mask_files</span><span class="p">))</span>
+<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="n">xray_files</span><span class="p">,</span> <span class="n">mask_files</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
+
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+
+<span class="n">train_len</span> <span class="o">=</span> <span class="mi">250</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="n">dev_len</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="n">test_len</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="n">batch_size</span>
+
+<span class="n">X_train_files</span> <span class="o">=</span> <span class="n">xray_files</span><span class="p">[:</span><span class="n">train_len</span><span class="p">]</span>
+<span class="n">y_train_files</span> <span class="o">=</span> <span class="n">mask_files</span><span class="p">[:</span><span class="n">train_len</span><span class="p">]</span>
+
+<span class="n">X_dev_files</span> <span class="o">=</span> <span class="n">xray_files</span><span class="p">[</span><span class="n">train_len</span><span class="p">:</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="p">]</span>
+<span class="n">y_dev_files</span> <span class="o">=</span> <span class="n">mask_files</span><span class="p">[</span><span class="n">train_len</span><span class="p">:</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="p">]</span>
+
+<span class="n">X_test_files</span> <span class="o">=</span> <span class="n">xray_files</span><span class="p">[</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="p">:</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="o">+</span><span class="n">test_len</span><span class="p">]</span>
+<span class="n">y_test_files</span> <span class="o">=</span> <span class="n">mask_files</span><span class="p">[</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="p">:</span><span class="n">train_len</span><span class="o">+</span><span class="n">dev_len</span><span class="o">+</span><span class="n">test_len</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Then, we want to make sure that the train/dev/test contains images with zero masks (without any detectable lung problem) in the same proportion.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="kn">import</span> <span class="n">load_img</span>
+<span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="kn">import</span> <span class="n">img_to_array</span>
+
+<span class="n">with_mask</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y_train_files</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">)))</span>
+    <span class="n">with_mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">train_positive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">with_mask</span><span class="p">)</span>
+
+<span class="n">with_mask</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y_dev_files</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">)))</span>
+    <span class="n">with_mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dev_positive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">with_mask</span><span class="p">)</span>
+
+<span class="n">with_mask</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y_test_files</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">)))</span>
+    <span class="n">with_mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">test_positive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">with_mask</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'Images with mask:'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'Train:{train_positive}, dev:{dev_positive}, test:{test_positive}'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Images with mask:
+Train:0.22075, dev:0.22734375, test:0.2296875
+</code></pre></div></div>
+
+<p>As we can see the split is good: train, dev and test sets contain about the same percentage of images with lung issues (around 22-23%).</p>
+
+<h3 id="using-google-colab">Using Google colab</h3>
+
+<p>Since at the moment we have no access to a local GPU, which is essential to train a conv net, we exploit Google colab free Jupiter notebook. We found out the major limitation of this approach is the low speed in loading the images from the hard drive to the memory, resulting in a very severe performance issue. When using Colab one can store the training files on a google drive folder and load them directly from there. The problem rise as soon as one try to load more then a couple of hundreds of images: at first the process is quite fast and requires for 5 to 10 ms for each image, which is ok, but, after a while, the speed drastically drop (apparently for no reason) and the loading time becomes of the order of half of a second, an extremely huge bottleneck in the pipeline which practically results in the freezing of the training computation. Since the dataset is quite small in size (of the order of Gb), we decided to load it all in memory. We used the <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format">HDF5</a> data format to store all the dataset, and load just this one big file on our google drive folder.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="n">data_filename</span> <span class="o">=</span> <span class="n">f</span><span class="s">'{root_path}data/data.h5'</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">data_filename</span><span class="p">,</span> <span class="s">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
+    
+    <span class="n">data_type</span> <span class="o">=</span> <span class="s">'uint8'</span>
+    
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"X_train"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"Y_train"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>      
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"X_dev"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_dev_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"Y_dev"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_dev_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>      
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"X_test"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_test_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s">"Y_test"</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_test_files</span><span class="p">),</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_train_files</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'X_train'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">X_train_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'Y_train'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">y_train_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_dev_files</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'X_dev'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">X_dev_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'Y_dev'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">y_dev_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_test_files</span><span class="p">)):</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'X_test'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">X_test_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">'Y_test'</span><span class="p">][</span><span class="n">index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img_to_array</span><span class="p">(</span><span class="n">load_img</span><span class="p">(</span>
+            <span class="n">y_test_files</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color_mode</span><span class="o">=</span><span class="s">'grayscale'</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+
+
+</code></pre></div></div>
+
+<h3 id="data-augmentation">Data augmentation</h3>
+
+<p>To avoid overfitting we decide to use a data augmentation technique widely used during the training of neural networks for computer vision tasks. The idea is never to train the network with the same image twice: every time the image is presented to the network to perform one gradient descent step, it is randomly modified by a given transformation chosen at random within a given set. To do this, we exploit the <code class="highlighter-rouge">ImageDataGenerator</code> Keras builtin function:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.preprocessing.image</span> <span class="kn">import</span> <span class="n">ImageDataGenerator</span>
+
+<span class="n">image_randomiser</span> <span class="o">=</span> <span class="n">ImageDataGenerator</span><span class="p">(</span>
+    <span class="n">rotation_range</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">width_shift_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">height_shift_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">zoom_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">fill_mode</span><span class="o">=</span><span class="s">'nearest'</span><span class="p">,</span>
+    <span class="n">horizontal_flip</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/xray/image_data_generator.png" alt="image data generator" width="800" /></p>
+
+<p>Here’s an example of 5 generated training images. One can see that each one has a different zoom, rotation angle, and stretch. All these modifications are not relevant for the problem of identifying the ill region of the lung, therefore, they act as data regularizers, preventing the model to learn spurious features.</p>
+
+<h3 id="building-up-generators">Building up generators</h3>
+
+<p>To never feed the network with the same image twice we can take advantage of python generators. The Keras library has a special fit function, <code class="highlighter-rouge">fit_generator</code>, which does take as input a generator of <code class="highlighter-rouge">X</code> and <code class="highlighter-rouge">y</code> data, instead of the data itself. This allows for very convenient solutions, such as on the fly random transformation or loading the data as a stream (very useful for huge datasets which do not fit into the memory).</p>
+
+<p>In our case, since the data is small enough, we decided to load everything in memory. The task of the generator is to randomly transform the images and to finally yield them as batches of size 32. As we can see, the <code class="highlighter-rouge">create_data_random_generator</code> exploit the Keras <code class="highlighter-rouge">ImageDataGenerator</code> to generate a random transformation to apply both at the lung image and to the corresponding mask. Notice we also create the simple <code class="highlighter-rouge">create_data_generator</code> generator, which has no transformation in it. This will be used to manage the data of the dev and test set.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">create_data_generator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>    
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'Creating generator from {number_of_samples} samples'</span><span class="p">)</span>
+    
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">data_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">data_X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">number_of_samples</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">/</span><span class="mf">255.</span>
+            <span class="n">data_y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">number_of_samples</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">/</span><span class="mf">255.</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+            
+        <span class="n">data_X</span> <span class="o">=</span> <span class="n">data_X</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="k">yield</span> <span class="n">data_X</span><span class="p">,</span> <span class="n">data_y</span>
+        
+        
+<span class="k">def</span> <span class="nf">create_data_random_generator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    
+    <span class="n">image_randomiser</span> <span class="o">=</span> <span class="n">ImageDataGenerator</span><span class="p">(</span>
+        <span class="n">rotation_range</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">width_shift_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">height_shift_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">zoom_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">fill_mode</span><span class="o">=</span><span class="s">'nearest'</span><span class="p">,</span>
+        <span class="n">horizontal_flip</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s">'Creating generator from {number_of_samples} samples'</span><span class="p">)</span>
+    
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">data_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">data_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        
+        <span class="n">transformation</span> <span class="o">=</span> <span class="n">image_randomiser</span><span class="o">.</span><span class="n">get_random_transform</span><span class="p">(</span><span class="n">img_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">data_X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_randomiser</span><span class="o">.</span><span class="n">apply_transform</span><span class="p">(</span>
+                        <span class="n">X</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">number_of_samples</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">/</span><span class="mf">255.</span><span class="p">,</span> <span class="n">transformation</span><span class="p">)</span>
+            
+            <span class="n">data_y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_randomiser</span><span class="o">.</span><span class="n">apply_transform</span><span class="p">(</span>
+                        <span class="n">y</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">number_of_samples</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">/</span><span class="mf">255.</span><span class="p">,</span> <span class="n">transformation</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+            
+        <span class="n">data_X</span> <span class="o">=</span> <span class="n">data_X</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="k">yield</span> <span class="n">data_X</span><span class="p">,</span> <span class="n">data_y</span>
+</code></pre></div></div>
+
+<p>Finally, we can create the generators for the train, the dev, and the test set, by loading the dataset form the HDF5 file:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">data_filename</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">train_generator</span> <span class="o">=</span> <span class="n">create_data_random_generator</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">[</span><span class="s">'X_train'</span><span class="p">][()],</span> <span class="n">f</span><span class="p">[</span><span class="s">'Y_train'</span><span class="p">][()],</span> <span class="mi">32</span><span class="p">)</span>
+    <span class="n">dev_generator</span> <span class="o">=</span> <span class="n">create_data_generator</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">'X_dev'</span><span class="p">][()],</span> <span class="n">f</span><span class="p">[</span><span class="s">'Y_dev'</span><span class="p">][()],</span> <span class="mi">32</span><span class="p">)</span>
+    <span class="n">test_generator</span> <span class="o">=</span> <span class="n">create_data_generator</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">'X_test'</span><span class="p">][()],</span> <span class="n">f</span><span class="p">[</span><span class="s">'Y_test'</span><span class="p">][()],</span> <span class="mi">32</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="neural-network-conv-model">Neural network conv model</h3>
+<p>For the first part of our model, we choose to exploit the VGG-16 pre-trained model, which is available directly from the Keras library. As we can see, together with the model, we load the weights resulting from the training of VGG-16 net on the imagenet dataset.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras.applications</span> <span class="kn">import</span> <span class="n">VGG16</span>
+
+<span class="n">conv_base</span> <span class="o">=</span> <span class="n">VGG16</span><span class="p">(</span><span class="n">weights</span> <span class="o">=</span> <span class="s">'imagenet'</span><span class="p">,</span>
+                  <span class="n">include_top</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                  <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Since we are interested in extracting just the lower features from the images, and not something related to real object identification, we exclude the final set of three convolutional layers. Finally, we set this model not to be trainable for the first stage of gradient descent.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">conv_base_crop</span><span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">conv_base</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="nb">input</span><span class="p">,</span>
+                      <span class="n">outputs</span><span class="o">=</span><span class="n">conv_base</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+<span class="n">conv_base_crop</span><span class="o">.</span><span class="n">trainable</span><span class="o">=</span><span class="bp">False</span>
+<span class="n">conv_base_crop</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</code></pre></div></div>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_1 (InputLayer)         (None, 256, 256, 3)       0         
+_________________________________________________________________
+block1_conv1 (Conv2D)        (None, 256, 256, 64)      1792      
+_________________________________________________________________
+block1_conv2 (Conv2D)        (None, 256, 256, 64)      36928     
+_________________________________________________________________
+block1_pool (MaxPooling2D)   (None, 128, 128, 64)      0         
+_________________________________________________________________
+block2_conv1 (Conv2D)        (None, 128, 128, 128)     73856     
+_________________________________________________________________
+block2_conv2 (Conv2D)        (None, 128, 128, 128)     147584    
+_________________________________________________________________
+block2_pool (MaxPooling2D)   (None, 64, 64, 128)       0         
+_________________________________________________________________
+block3_conv1 (Conv2D)        (None, 64, 64, 256)       295168    
+_________________________________________________________________
+block3_conv2 (Conv2D)        (None, 64, 64, 256)       590080    
+_________________________________________________________________
+block3_conv3 (Conv2D)        (None, 64, 64, 256)       590080    
+_________________________________________________________________
+block3_pool (MaxPooling2D)   (None, 32, 32, 256)       0         
+_________________________________________________________________
+block4_conv1 (Conv2D)        (None, 32, 32, 512)       1180160   
+_________________________________________________________________
+block4_conv2 (Conv2D)        (None, 32, 32, 512)       2359808   
+_________________________________________________________________
+block4_conv3 (Conv2D)        (None, 32, 32, 512)       2359808   
+_________________________________________________________________
+block4_pool (MaxPooling2D)   (None, 16, 16, 512)       0         
+=================================================================
+Total params: 7,635,264
+Trainable params: 0
+Non-trainable params: 7,635,264
+_________________________________________________________________
+</code></pre></div></div>
+
+<p>We final part of our model is a  sequence of <code class="highlighter-rouge">Conv2D</code> layers, to reduce the number of filters, and <code class="highlighter-rouge">UpSampling2D</code> layers, to increase the size of the image representation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="n">doctor_model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">conv_base</span><span class="p">)</span>
+
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s">'sigmoid'</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s">'same'</span><span class="p">))</span>
+
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</code></pre></div></div>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+model_1 (Model)              (None, 16, 16, 512)       7635264   
+_________________________________________________________________
+conv2d_1 (Conv2D)            (None, 16, 16, 32)        147488    
+_________________________________________________________________
+up_sampling2d_1 (UpSampling2 (None, 32, 32, 32)        0         
+_________________________________________________________________
+conv2d_2 (Conv2D)            (None, 32, 32, 16)        4624      
+_________________________________________________________________
+up_sampling2d_2 (UpSampling2 (None, 64, 64, 16)        0         
+_________________________________________________________________
+conv2d_3 (Conv2D)            (None, 64, 64, 16)        2320      
+_________________________________________________________________
+up_sampling2d_3 (UpSampling2 (None, 128, 128, 16)      0         
+_________________________________________________________________
+conv2d_4 (Conv2D)            (None, 128, 128, 8)       1160      
+_________________________________________________________________
+up_sampling2d_4 (UpSampling2 (None, 256, 256, 8)       0         
+_________________________________________________________________
+conv2d_5 (Conv2D)            (None, 256, 256, 1)       73        
+=================================================================
+Total params: 7,790,929
+Trainable params: 155,665
+Non-trainable params: 7,635,264
+_________________________________________________________________
+</code></pre></div></div>
+
+<h3 id="fit">Fit</h3>
+
+<p>We fit the model using the <code class="highlighter-rouge">binary_crossentropy</code> loss function and <code class="highlighter-rouge">Adam</code> as optimizer. We finally save the model as an HDF5 file.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">doctor_model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'binary_crossentropy'</span><span class="p">,</span>
+                    <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">2e-5</span><span class="p">))</span>
+
+<span class="n">out</span> <span class="o">=</span> <span class="n">doctor_model</span><span class="o">.</span><span class="n">fit_generator</span><span class="p">(</span><span class="n">train_generator</span><span class="p">,</span>
+                                 <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+                                 <span class="n">epochs</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+                                 <span class="n">validation_data</span> <span class="o">=</span> <span class="n">dev_generator</span><span class="p">,</span>
+                                 <span class="n">validation_steps</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+                                 <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">doctor_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="s">'./doctor_model.h5'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="final-results">Final results</h3>
+
+<p>Finally, we plot some model predictions on the test set (data never seen by the network before). On the left, we plot the input image, the x-ray of the lungs. In the middle, we plot the target mask, as indicated by a specialized doctor. On the right, we plot the prediction of our model.</p>
+
+<p>This simple model performs quite well! We also notice that, without having explicitly programmed it to behave like this, most of the errors are false positives and not false negatives, which is great: in this context, it is much better to over-estimate a problem, rather than missing it.</p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_0_2.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_0_3.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_1_10.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_negative_0_1.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_2_9.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_negative_0_15.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_2_10.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_negative_0_11.png" alt="result" width="800" /></p>
+
+<p style="text-align:center;"><img src="/asset/images/xray/results/test_2_28.png" alt="result" width="800" /></p>
+
+:ET

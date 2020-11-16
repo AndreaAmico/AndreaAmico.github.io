@@ -2,7 +2,7 @@
 layout: post
 title:  "Torch tensorboard"
 date:   2020-11-05 22:00:00 +0100
-categories: other
+categories: ML-tools
 ---
 
 Collection of snippets of `tensorboard` usage with `pytorch` using the [tensorboardX](https://github.com/lanpa/tensorboardX) library.
