@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Data exploration"
-date:   2019-05-20 23:00:00 +0100
+date:   2019-05-20 20:00:00 +0100
 categories: data-analysis
 ---
 
