@@ -2,7 +2,7 @@
 layout: post
 title:  "Live update jupyter plot"
 date:   2019-05-09 22:00:00 +0100
-categories: data-analysis
+categories: data-visualization
 ---
 
 ```python

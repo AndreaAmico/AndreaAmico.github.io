@@ -1,7 +1,11 @@
-I"Ø5<p><a href="#cat-python">python</a>, <a href="#cat-fast-copy-paste">fast-copy-paste</a>, <a href="#cat-data-analysis">data-analysis</a>, <a href="#cat-other">other</a>, <a href="#cat-reinforcement-learning">reinforcement-learning</a>, <a href="#cat-supervised-learning">supervised-learning</a>, <a href="#cat-unsup-learning">unsup-learning</a>, <a href="#cat-ML-tools">ML-tools</a>,</p>
+I"2;<p><a href="#cat-python">python</a>, <a href="#cat-fast-copy-paste">fast-copy-paste</a>, <a href="#cat-data-analysis">data-analysis</a>, <a href="#cat-other">other</a>, <a href="#cat-reinforcement-learning">reinforcement-learning</a>, <a href="#cat-supervised-learning">supervised-learning</a>, <a href="#cat-unsup-learning">unsup-learning</a>, <a href="#cat-data-visualization">data-visualization</a>, <a href="#cat-ML-tools">ML-tools</a>,</p>
 
 <h4 id="cat-python">python</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -354,6 +358,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/fast-copy-paste/2017/11/20/list_sorting.html">Sorting two lists</a>
         </li>
@@ -451,6 +459,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/data-analysis/2020/03/02/hist_sampling.html">Histogram sampling</a>
         </li>
@@ -507,10 +519,6 @@
   
     
       
-        <li>
-           <a href="/data-analysis/2019/07/21/matplotlib.html">Matplotlib</a>
-        </li>
-      
     
   
     
@@ -544,7 +552,7 @@
     
       
         <li>
-           <a href="/data-analysis/2019/05/21/data_exploration.html">Data exploration</a>
+           <a href="/data-analysis/2019/05/20/data_exploration.html">Data exploration</a>
         </li>
       
     
@@ -677,6 +685,10 @@
 
 <h4 id="cat-other">other</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -882,6 +894,10 @@
 
 <h4 id="cat-reinforcement-learning">reinforcement-learning</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -1162,6 +1178,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/supervised-learning/2019/06/30/xray.html">Dectection of pneumothorax using x-ray images</a>
         </li>
@@ -1292,6 +1312,10 @@
 
 <h4 id="cat-unsup-learning">unsup-learning</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -1491,8 +1515,213 @@
   
 </ul>
 
+<h4 id="cat-data-visualization">data-visualization</h4>
+<ul> 
+  
+    
+      
+        <li>
+           <a href="/data-visualization/2020/12/01/matplotlib-gif.html">Matplotlib gif animation</a>
+        </li>
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+        <li>
+           <a href="/data-visualization/2019/07/21/matplotlib.html">Matplotlib</a>
+        </li>
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+</ul>
+
 <h4 id="cat-ML-tools">ML-tools</h4>
 <ul> 
+  
+    
+      
+    
   
     
       

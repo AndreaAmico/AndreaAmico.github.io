@@ -1,0 +1,113 @@
+I"¿J<p>Simple API for creating gif animation using <a href="https://matplotlib.org/">matplotlib</a> and <a href="https://imageio.github.io/">imageio</a>.</p>
+
+<h2 id="gif-maker-class-definition">Gif maker class definition</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">imageio</span><span class="p">,</span> <span class="n">os</span>
+
+<span class="k">class</span> <span class="nc">Gif_maker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_folder</span><span class="o">=</span><span class="s">'./buffer-gif-maker'</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">palettesize</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">buffer_folder</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">buffer_folder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_folder</span> <span class="o">=</span> <span class="n">buffer_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">palettesize</span> <span class="o">=</span> <span class="n">palettesize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fps</span> <span class="o">=</span> <span class="n">fps</span>
+        
+    <span class="k">def</span> <span class="nf">snap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+        <span class="n">image_name</span> <span class="o">=</span> <span class="n">f</span><span class="s">'{self.buffer_folder}/temp_img_{self.image_index}.jpg'</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s">'./animation.gif'</span><span class="p">):</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageio</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_list</span><span class="p">]</span>
+        <span class="n">imageio</span><span class="o">.</span><span class="n">mimwrite</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fps</span><span class="p">,</span> <span class="n">palettesize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palettesize</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_list</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">'.ipynb_checkpoints'</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_folder</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">f</span><span class="s">'{self.buffer_folder}/.ipynb_checkpoints'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_folder</span><span class="p">))</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_folder</span><span class="p">)</span>
+    
+    
+</code></pre></div></div>
+
+<h2 id="usage">Usage</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">gm</span> <span class="o">=</span> <span class="n">Gif_maker</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    
+	<span class="c1">## PLOT HERE USING THE AXIS ax
+</span>
+    <span class="n">gm</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span> <span class="c1"># take the snapshot of the figure
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span> <span class="c1"># clear the axis for the next gif frame
+</span><span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">gm</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_file</span><span class="o">=</span><span class="s">'./my_animation.gif'</span><span class="p">)</span> <span class="c1"># save the gif
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="example">Example</h2>
+
+<p>Here we show how to create a gif of a rotating 3d object.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+<span class="kn">import</span> <span class="nn">mpl_toolkits.mplot3d.art3d</span> <span class="k">as</span> <span class="n">art3d</span>
+
+<span class="c1">################## CREATE NICE LOOKING FIELD  #########################
+</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">X_SIZE</span><span class="p">,</span> <span class="n">Y_SIZE</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span>
+<span class="n">field</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">Y_SIZE</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="n">X_SIZE</span><span class="o">*</span><span class="mi">10</span><span class="p">]))</span>
+<span class="n">field</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Y_SIZE</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">X_SIZE</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#binning
+</span><span class="n">yx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[:</span><span class="n">Y_SIZE</span><span class="p">,</span> <span class="p">:</span><span class="n">X_SIZE</span><span class="p">]</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">yx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">yx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">field</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="c1">#######################################################################
+</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">gm</span> <span class="o">=</span> <span class="n">Gif_maker</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">'3d'</span><span class="p">,</span> <span class="n">proj_type</span><span class="o">=</span><span class="s">'ortho'</span><span class="p">,</span> <span class="n">azim</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span> <span class="n">elev</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">60</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">antialiased</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s">'Greens_r'</span><span class="p">,</span>
+                    <span class="n">shade</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">xlim3d</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">ylim3d</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">zticks</span><span class="o">=</span><span class="p">[])</span>
+
+    <span class="c1"># Set spines colors (alpha channel to remove)
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">w_xaxis</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s">'none'</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">w_yaxis</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s">'none'</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">w_zaxis</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s">'none'</span><span class="p">)</span>
+
+    <span class="c1"># Set panes color
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">w_xaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">w_yaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">w_zaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+    <span class="n">gm</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">gm</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Finally we can show the result in a jupyter notebook or a Google Colab notebook:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="n">Image</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">'animation.gif'</span><span class="p">,</span><span class="s">'rb'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+</code></pre></div></div>
+
+<p style="text-align:center;"><img src="/asset/images/matplotlib/3danimation.gif" alt="3d animation" width="500" /></p>
+
+:ET

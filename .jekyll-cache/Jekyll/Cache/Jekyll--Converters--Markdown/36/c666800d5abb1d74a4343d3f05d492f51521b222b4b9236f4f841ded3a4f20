@@ -1,7 +1,11 @@
-I"Ø5<p><a href="#cat-python">python</a>, <a href="#cat-fast-copy-paste">fast-copy-paste</a>, <a href="#cat-data-analysis">data-analysis</a>, <a href="#cat-other">other</a>, <a href="#cat-reinforcement-learning">reinforcement-learning</a>, <a href="#cat-supervised-learning">supervised-learning</a>, <a href="#cat-unsup-learning">unsup-learning</a>, <a href="#cat-ML-tools">ML-tools</a>,</p>
+I"-;<p><a href="#cat-python">python</a>, <a href="#cat-fast-copy-paste">fast-copy-paste</a>, <a href="#cat-data-analysis">data-analysis</a>, <a href="#cat-other">other</a>, <a href="#cat-reinforcement-learning">reinforcement-learning</a>, <a href="#cat-supervised-learning">supervised-learning</a>, <a href="#cat-unsup-learning">unsup-learning</a>, <a href="#cat-ML-tools">ML-tools</a>, <a href="#cat-data-visualization">data-visualization</a>,</p>
 
 <h4 id="cat-python">python</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -354,6 +358,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/fast-copy-paste/2017/11/20/list_sorting.html">Sorting two lists</a>
         </li>
@@ -436,6 +444,10 @@
 
 <h4 id="cat-data-analysis">data-analysis</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -684,6 +696,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/other/2020/07/28/unix.html">Unix snippets</a>
         </li>
@@ -882,6 +898,10 @@
 
 <h4 id="cat-reinforcement-learning">reinforcement-learning</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -1162,6 +1182,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/supervised-learning/2019/06/30/xray.html">Dectection of pneumothorax using x-ray images</a>
         </li>
@@ -1292,6 +1316,10 @@
 
 <h4 id="cat-unsup-learning">unsup-learning</h4>
 <ul> 
+  
+    
+      
+    
   
     
       
@@ -1496,6 +1524,10 @@
   
     
       
+    
+  
+    
+      
         <li>
            <a href="/ml-tools/2020/11/05/torch-tensorboard.html">Torch tensorboard</a>
         </li>
@@ -1567,6 +1599,203 @@
         <li>
            <a href="/ml-tools/2019/07/25/data_scaling.html">Data scaling</a>
         </li>
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+</ul>
+
+<h4 id="cat-data-visualization">data-visualization</h4>
+<ul> 
+  
+    
+      
+        <li>
+           <a href="/data-visualization/2020/12/01/matplotlib-gif.html">Matplotlib gif animation</a>
+        </li>
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
       
     
   

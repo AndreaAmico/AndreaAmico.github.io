@@ -2,7 +2,7 @@
 layout: post
 title:  "Geopandas"
 date:   2019-06-12 22:00:00 +0100
-categories: data-analysis
+categories: data-visualization
 ---
 
 ### Imports for jupyter
