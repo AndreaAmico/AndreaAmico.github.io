@@ -2,7 +2,7 @@
 layout: post
 title:  "Train generator"
 date:   2020-12-09 18:00:00 +0100
-categories: other
+categories: ml-tools
 ---
 
 
