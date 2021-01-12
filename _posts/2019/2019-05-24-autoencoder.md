@@ -180,7 +180,7 @@ After 50 epochs of training the loss function seems to be almost saturated, with
 <p style="text-align:center;"><img src="/asset/images/autoencoder/training.png" alt="autoecoder training" height="200"></p>
 
 
-
+If you want to try the model without training you can download a pre-trained model from [here]({{site.url}}/asset/models/autoencoder_digits_tf.h5).
 
 ### Testing the model
 
