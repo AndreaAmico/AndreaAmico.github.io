@@ -115,7 +115,6 @@ fig.savefig('./basic_plots.svg', bbox_inches='tight')
 
 ### Dimensionality reduction
 ```python
-```python
 from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -162,7 +161,6 @@ ax_pca.axis('off')
 ax_tsne.axis('off')
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
     wspace=1, hspace=None)
-
 
 fig.savefig('./plots/dimensionality_reduction.svg', bbox_inches='tight')
 ```

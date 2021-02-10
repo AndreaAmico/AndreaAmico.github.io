@@ -1,4 +1,4 @@
-I"TÓ<h3 id="my-colors">My colors</h3>
+I"Ó<h3 id="my-colors">My colors</h3>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">cycler</span> <span class="kn">import</span> <span class="n">cycler</span>
 <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">'#0c6575'</span><span class="p">,</span> <span class="s">'#bbcbcb'</span><span class="p">,</span> <span class="s">'#23a98c'</span><span class="p">,</span> <span class="s">'#fc7a70'</span><span class="p">,</span><span class="s">'#a07060'</span><span class="p">,</span>
           <span class="s">'#003847'</span><span class="p">,</span> <span class="s">'#FFF7D6'</span><span class="p">,</span> <span class="s">'#5CA4B5'</span><span class="p">,</span> <span class="s">'#eeeeee'</span><span class="p">]</span>
@@ -100,8 +100,7 @@
 <p style="text-align:center;"><img src="/asset/images/matplotlib/basic_plots.svg" alt="basic plots" width="800" /></p>
 
 <h3 id="dimensionality-reduction">Dimensionality reduction</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sb">``</span><span class="err">`</span><span class="n">python</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_iris</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_iris</span>
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 <span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="kn">import</span> <span class="n">TSNE</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
@@ -147,7 +146,6 @@
 <span class="n">ax_tsne</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">'off'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
     <span class="n">wspace</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-
 
 <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'./plots/dimensionality_reduction.svg'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s">'tight'</span><span class="p">)</span>
 </code></pre></div></div>
