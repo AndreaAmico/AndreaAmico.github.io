@@ -115,38 +115,54 @@ fig.savefig('./basic_plots.svg', bbox_inches='tight')
 
 ### Dimensionality reduction
 ```python
+```python
 from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import numpy as np
+
+from cycler import cycler
+colors = ['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70','#a07060',
+          '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
+plt.rcParams['axes.prop_cycle'] = cycler(color = colors)
+
+
 
 iris_dataset = load_iris()
-X_TSNE = TSNE(n_components=2, random_state=1).fit_transform(iris_dataset.data)
-X_PCA = PCA(n_components=2).fit_transform(iris_dataset.data)
+X = iris_dataset.data
+y = iris_dataset.target
+y_names = {0:'setosa', 1:'versicolor', 2:'virginica'} # optional, None is fine
+
+
+X_TSNE = TSNE(n_components=2, random_state=1).fit_transform(X)
+X_PCA = PCA(n_components=2).fit_transform(X)
 
 
 fig, (ax_pca, ax_tsne) = plt.subplots(1, 2, figsize=(10, 4))
 
-for target_class_index, target_class in enumerate(np.unique(iris_dataset.target)):
-    marker = f'${target_class}$'
-    class_mask = (iris_dataset.target == target_class)
+for y_class in np.unique(y):
+    marker = f'${y_class}$'
+    class_mask = (y == y_class)
     
     ax_tsne.scatter(X_TSNE[class_mask, 0], X_TSNE[class_mask, 1],
-              marker=marker, color=color(target_class_index),
-              label=iris_dataset.target_names[target_class])
+              marker=marker, color=colors[y_class],
+              label=y_names[y_class] if y_names else f'${y_class}$')
     ax_pca.scatter(X_PCA[class_mask, 0], X_PCA[class_mask, 1],
-              marker=marker, color=color(target_class_index))
+              marker=marker, color=colors[y_class])
     
-ax_pca.set_title('PCA', color=color(5))
-ax_tsne.set_title('t-SNE', color=color(5))
+ax_pca.set_title('PCA', color=colors[5])
+ax_tsne.set_title('t-SNE', color=colors[5])
 
 ax_tsne.legend(loc='lower left', bbox_to_anchor=(-1, 0.1), ncol=3,
     scatterpoints=3, frameon=True, fancybox=True, framealpha=0.2,
-    facecolor=color(1), edgecolor=color(0))
+    facecolor=colors[1], edgecolor=colors[0])
 
 ax_pca.axis('off')
 ax_tsne.axis('off')
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
     wspace=1, hspace=None)
+
 
 fig.savefig('./plots/dimensionality_reduction.svg', bbox_inches='tight')
 ```

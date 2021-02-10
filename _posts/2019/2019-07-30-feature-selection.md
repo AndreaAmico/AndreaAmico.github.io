@@ -78,4 +78,62 @@ pca = PCA(n_components=2)
 X_2D = pca.fit_transform(X)
 ```
 
+
+
+## PCA and T-SNE plots
+```python
+from sklearn.datasets import load_iris
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import numpy as np
+
+from cycler import cycler
+colors = ['#0c6575', '#bbcbcb', '#23a98c', '#fc7a70','#a07060',
+          '#003847', '#FFF7D6', '#5CA4B5', '#eeeeee']
+plt.rcParams['axes.prop_cycle'] = cycler(color = colors)
+
+
+
+iris_dataset = load_iris()
+X = iris_dataset.data
+y = iris_dataset.target
+y_names = {0:'setosa', 1:'versicolor', 2:'virginica'} # optional, None is fine
+
+
+X_TSNE = TSNE(n_components=2, random_state=1).fit_transform(X)
+X_PCA = PCA(n_components=2).fit_transform(X)
+
+
+fig, (ax_pca, ax_tsne) = plt.subplots(1, 2, figsize=(10, 4))
+
+for y_class in np.unique(y):
+    marker = f'${y_class}$'
+    class_mask = (y == y_class)
+    
+    ax_tsne.scatter(X_TSNE[class_mask, 0], X_TSNE[class_mask, 1],
+              marker=marker, color=colors[y_class],
+              label=y_names[y_class] if y_names else f'${y_class}$')
+    ax_pca.scatter(X_PCA[class_mask, 0], X_PCA[class_mask, 1],
+              marker=marker, color=colors[y_class])
+    
+ax_pca.set_title('PCA', color=colors[5])
+ax_tsne.set_title('t-SNE', color=colors[5])
+
+ax_tsne.legend(loc='lower left', bbox_to_anchor=(-1, 0.1), ncol=3,
+    scatterpoints=3, frameon=True, fancybox=True, framealpha=0.2,
+    facecolor=colors[1], edgecolor=colors[0])
+
+ax_pca.axis('off')
+ax_tsne.axis('off')
+plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
+    wspace=1, hspace=None)
+```
+
 <p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/pca.png" alt="pca_comparison" width="800"></p>
+
+
+
+
+
+
