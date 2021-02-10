@@ -81,6 +81,7 @@ X_2D = pca.fit_transform(X)
 
 
 ## PCA and T-SNE plots
+
 ```python
 from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
