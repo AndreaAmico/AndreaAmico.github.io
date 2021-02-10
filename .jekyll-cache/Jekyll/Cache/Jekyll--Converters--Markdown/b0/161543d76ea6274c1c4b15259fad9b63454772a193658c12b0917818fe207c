@@ -1,7 +1,7 @@
-I"ò<h2 id="file-managing">File managing</h2>
+I"ó<h2 id="file-managing">File managing</h2>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ls</span>  <span class="nt">-a</span> <span class="o">(</span>includes hidden<span class="o">)</span>
     <span class="nt">-d</span> <span class="o">(</span>directories<span class="o">)</span>
-    <span class="nt">-ls</span> <span class="o">(</span>details + size<span class="o">)</span>
+    <span class="nt">-lsh</span> <span class="o">(</span>details + size<span class="o">)</span>
     <span class="nt">-R</span> <span class="o">(</span>recursive directories<span class="o">)</span>
 
 <span class="nb">cp</span>  <span class="nt">-n</span> <span class="o">(</span>no overwrite file<span class="o">)</span>
