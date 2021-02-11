@@ -8,7 +8,7 @@ categories: ml-tools
 
 One of the most flexible ways to train machine learning models is by feeding the training data to the `fit` function via a python generator. This method has several advantages, it allows to preprocess the data in a customized way for every training loop (e.g. data augmentation), it allows to automatically deal with the batch size and the shuffling of the data for different epochs, and finally, it can be used to use gradually the training dataset if its size does not allow to load everything into the RAM.
 
-## Create a data generator
+## Create a data generator using a function
 This snippet can be used as a blueprint to create the most suitable data generator for a given project.
 
 ```python
@@ -69,3 +69,34 @@ Batch number 2:  x = ['x', 'i', 'g']   y = ['X', 'I', 'G']
 Batch number 3:  x = ['d', 'v', 'f']   y = ['D', 'V', 'F']
 Batch number 4:  x = ['m', 'a', 'q']   y = ['M', 'A', 'Q']
 ```
+
+
+## Data gererator tamplete for tensorflow
+Fill the `...` parts:
+```python
+class DataGenerator(tf.keras.utils.Sequence):
+    def __init__(self, data, batch_size=32, shuffle=True):
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.data = data
+        self.data_len = ...
+        self.on_epoch_end()
+
+    def get_batch_shape(self):
+        return (self.batch_size, ...)
+  
+    def __len__(self):
+        return int(np.floor(self.data_len/ self.batch_size))
+
+    def __getitem__(self, index):
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        X = ...
+        y = ...
+        return X, y
+
+    def on_epoch_end(self):
+        self.indexes = np.arange(len(self.splits))
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+```
+
