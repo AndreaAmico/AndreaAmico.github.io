@@ -7,8 +7,6 @@ categories: other
 
 
 
-
-
 ### Command line from notebook
 ```bash
 # aws s3 ls [bucket_name]
