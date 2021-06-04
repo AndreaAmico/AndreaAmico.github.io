@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "AWS snippets"
-date:   2021-06-04 20:00:00 +0100
+date:   2021-06-03 20:00:00 +0100
 categories: other
 ---
 
