@@ -20,3 +20,28 @@ np.random.shuffle(indices)
 data = data[indices]
 labels = labels[indices]
 ```
+
+
+### Balance a dataset
+For training unbalanced dataset the siples solution is the reduce the size of the most populated classes to the size of the least populated:
+```python
+import pandas as pd
+import numpy as np
+
+df = pd.DataFrame({'feature_1':np.random.choice([4,5], size=100),
+                   'feature_2':np.random.random(size=100),
+                   'target':np.random.choice([0,1,2], size=100)})
+
+df_g = df.groupby(['target'])
+df_bal = df_g.apply(lambda x: x.sample(df_g.size().min()).reset_index(drop=True))
+```
+Here's a coutplot before and after the balancing:
+```python
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12,3))
+sns.countplot(data=df, y='target', ax=ax0).set_title('Before')
+sns.countplot(data=df_bal, y='target', ax=ax1).set_title('After')
+```
+<p style="text-align:center;"><img src="/asset/images/preprocessing/balancing.png" alt="balancing" width="700"></p>
