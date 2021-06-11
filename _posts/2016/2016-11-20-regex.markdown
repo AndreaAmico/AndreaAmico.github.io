@@ -6,14 +6,14 @@ categories: python
 ---
 
 Findall method returns a list of the strings containing the matches:
-{% highlight python %}
+```python
 import re
 
 my_string = "My emails are xyz@mail.xor and zyx@liam.rox"
 
 for i, email in enumerate(re.findall("\S+@\S+", my_string)):
     print("Email {}: {}".format(i, email))
-{% endhighlight %}
+```
 Email 0: xyz@mail.xor
 Email 1: zyx@liam.rox
 
@@ -22,11 +22,11 @@ The main methods are `.group(group_index)`, that returns the matched string, `.s
 that returns the position of the first character of the matched string in the original string, and `.end(group_index)`.
 `group_index` is needed when more than one parentheses () is used.
 
-{% highlight python %}
+```python
 for i, email in enumerate(re.finditer("\S+@\S+", my_string)):
     print("Email {}: {}, starts at position: {} and ends at position: {}"
         .format(i, email.group(0), email.start(0), email.end(0)))
-{% endhighlight %}
+```
 Email 0: xyz@mail.xor, starts at position: 14 and ends at position: 26
 Email 1: zyx@liam.rox, starts at position: 31 and ends at position: 43
 
@@ -38,9 +38,9 @@ Email 1: zyx@liam.rox, starts at position: 31 and ends at position: 43
 - (?<!**foo**): negative lookbehind (asserts that what immediately precedes the current position in the string is not **foo**)
 
 Example:
-{% highlight python %}
+```python
 re.sub('(?<=\()(\d+)(?=\)\.txt$)', '6', 'my_file(5).txt')
-{% endhighlight %}
+```
 
 returns *'my_file(6).txt'*.
 

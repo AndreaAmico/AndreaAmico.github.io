@@ -74,5 +74,5 @@ x_bin, y_bin, x_err, y_err = bin_data(x, y, bins)
 plt.errorbar(x_bin, y_bin, yerr= y_err, xerr=x_err, fmt='H', ms=10, color='black')
 ```
 
-<p style="text-align:center;"><img src="/asset/images/data_analysis/binning.svg" alt="binning 1" height="300"></p>
+<!-- <p style="text-align:center;"><img src="/asset/images/data_analysis/binning.svg" alt="binning 1" height="300"></p> -->
 

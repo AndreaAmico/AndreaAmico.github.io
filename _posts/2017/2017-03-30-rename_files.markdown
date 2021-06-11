@@ -12,7 +12,7 @@ In the folder *".\my_folder\subfolder\subsubfolder\"* there are files named:
 
 I want to rename them changing **A** to **B**:
 
-{% highlight python %}
+```python
 import os, glob
 import re
 file_path = os.path.abspath('my_folder//subfolder\subsubfolder/fileA_*.txt')
@@ -24,7 +24,7 @@ new = 'B'
 mach_string = '(?<={}){}(?={})'.format(prev, old, after)
 for single_file in glob.glob(file_path):
     os.rename(single_file, re.sub(mach_string, new, single_file))
-{% endhighlight %}
+```
 
 
 `os.path.abspath` is used to normalize the path (independently of the OS).

@@ -9,7 +9,7 @@ categories: python
 
 NB: it returns a map object that can be converted back to a list, or used as a generator.
 
-{% highlight python %}
+```python
 my_list = [0, 0, 7]
 
 def foo(x):
@@ -24,14 +24,14 @@ mapped_list = list(map(lambda x:(x+1)**2, my_list))
 mapped_list = [foo(x) for x in my_list]
 
 print(mapped_list)
-{% endhighlight %}
+```
 Output:
 *[1, 1, 64]*
 
 --------------------------------------
 
 `Filter` takes a function and a list as parameters, and returns a filter object (that can be converted into a list or used as a generator) that contains the values of the input list for which the input function returns `True`.
-{% highlight python %}
+```python
 my_list = [1, 2, 90890, 5, 8, 234253, 9]
 
 filtered_list = filter(lambda x:x<100, my_list)
@@ -41,6 +41,6 @@ filtered_list = [x for x in my_list if x<100]
 
 
 print(*filtered_list, sep=' - ')
-{% endhighlight %}
+```
 Output:
 *1 - 2 - 5 - 8 - 9*

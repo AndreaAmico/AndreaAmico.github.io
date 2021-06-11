@@ -11,7 +11,7 @@ The data is stored in a `Struct` and then packed to be sent as binary data. `fmt
 
 `Line` can be initialized both as a client and as a server. The server application must be launched before the client. When data is sent, the listener application runs the function `action` with the data received as first argument. `actionargs` can be used to share variables (in the example below it is used for a queue object).
 
-{% highlight python %}
+```python
 import socket
 import struct
 
@@ -59,11 +59,11 @@ class Line(object):
 
     def __exit__(self):
         self.sock.close()
-{% endhighlight %}
+```
 
 
 Server:
-{% highlight python %}
+```python
 import queue
 import threading
 import time
@@ -85,10 +85,10 @@ myServer = ipcomm.Line(fmt=fmt, server=True, action=c_fun, actionargs=jobs)
 pj = threading.Thread(target=process_job, args=(jobs,))
 pj.setDaemon(True)
 pj.start()
-{% endhighlight %}
+```
 
 Client:
-{% highlight python %}
+```python
 import ipcomm
 
 fmt='!I30sd'
@@ -100,6 +100,6 @@ while(True):
     c = float(input("Sleep time (s): "))
     myClient.send((a, b, c))
     print(" >>>>>> Struct sent to the client >>>>>>")
-{% endhighlight %}
+```
 
-{% include _images/{{ page.date | date: '%Y-%m-%d'}}/server_client_example.html  %}
+<p style="text-align:center;"><img src="/asset/images/2016-09-05/server_client_example.png" alt="server_client_example" width="800"></p>

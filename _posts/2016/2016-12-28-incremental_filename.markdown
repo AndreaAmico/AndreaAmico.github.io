@@ -11,7 +11,7 @@ categories: python
 - *filename(2).ext*: if only *filename.ext* is found
 - *filename(**n+1**).ext*: if *filename(**n**).ext* is found (with **n** being the maximum in the folder)
 
-{% highlight python %}
+```python
 from glob import glob
 import os
 import re
@@ -30,12 +30,12 @@ def increment_filename(path, filename, ext):
         else:
             new_complete_path = os.path.join(path, filename+'.'+ext)
     return new_complete_path
-{% endhighlight %}
+```
 
-{% highlight python %}
+```python
 new_path = increment_filename(path="my_path", filename="my_file", ext="txt")
 
 f = open(new_path, 'w')
 f.writelines("I am a really nice file!!!")
 f.close()
-{% endhighlight %}
+```

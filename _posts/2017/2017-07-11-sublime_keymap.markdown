@@ -5,7 +5,7 @@ date:   2017-07-11 9:00:00 +0100
 categories: fast-copy-paste
 ---
 
-{% highlight javascript %}
+```json
 [
 // Bookmarks
   { "keys": ["ctrl+space"], "command": "next_bookmark" }, 
@@ -120,4 +120,4 @@ categories: fast-copy-paste
   }
 ]
 
-{% endhighlight %}
+```
