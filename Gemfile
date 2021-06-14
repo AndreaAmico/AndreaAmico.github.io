@@ -1,3 +1,4 @@
 source "https://rubygems.org"
 
-gem 'jekyll', '3.1.2'
+# gem 'jekyll', '4.2.0'
+gem "github-pages", "215", group: :jekyll_plugins
