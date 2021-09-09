@@ -49,7 +49,7 @@ pd.read_clipboard(sep='\s\s+') # read from clipboard!
 
 ## from string in python 3
 from io import StringIO
-df_scav_factory = pd.read_csv(StringIO(my_string), sep=",")
+pd.read_csv(StringIO(my_string), sep=",")
 
 pd.read_csv('f.csv', header=None) # default header is 0, 
 pd.read_csv('f.csv', sep='\s+') # sep can be RegEx (any number of spaces)
