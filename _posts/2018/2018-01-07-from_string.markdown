@@ -59,3 +59,22 @@ print(x - np.sqrt(y))
 {% endhighlight %}
 
 [ 0.         -0.00499377  0.         -0.03732585  0.        ]
+
+
+## Using pandas
+If we need a pandas dataframe instead, we can exploit the `StringIO` method from the standard `io` library:
+{% highlight python %}
+import pandas as pd
+from io import StringIO
+
+data = '''
+x,y
+1,1
+2,4.02
+3,9
+4,6.3
+5,25
+'''
+
+df = pd.read_csv(StringIO(data), sep=",")
+{% endhighlight %}
