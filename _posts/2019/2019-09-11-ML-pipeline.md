@@ -45,3 +45,22 @@ sns.countplot(data=df, y='target', ax=ax0).set_title('Before')
 sns.countplot(data=df_bal, y='target', ax=ax1).set_title('After')
 ```
 <p style="text-align:center;"><img src="/asset/images/preprocessing/balancing.png" alt="balancing" width="700"></p>
+
+
+### Plot training history metrics for tensorflow models
+```python
+def plot_history(model):
+    history = model.history.history
+    history_keys = [h for h in history.keys() if not 'val' in h]
+    n_axis = len(history_keys)
+    fig, axs = plt.subplots(1, n_axis, figsize=(n_axis*5, 3))
+    for ax, k in zip(axs, history_keys):
+        ax.plot(history[k], label=k)
+        ax.plot(history['val_'+k], label='val_'+k)
+        ax.set(xlim=(0, len(history[k])-1), xlabel='epochs')
+        ax.legend()
+        
+## example usage given a tf model:
+## plot_history(model)
+```
+<p style="text-align:center;"><img src="/asset/images/snippets/metrics_history.png" alt="metrics_histoty" width="700"></p>
