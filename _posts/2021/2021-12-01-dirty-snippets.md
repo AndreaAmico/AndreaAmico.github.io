@@ -7,7 +7,7 @@ categories: other
 
 
 
-### Define and create a folder in onne line
+### Define and create a folder in one line
 ```python
 new_dir = lambda d: d if os.path.isdir(d) else (d, os.makedirs(d))[0]
 
