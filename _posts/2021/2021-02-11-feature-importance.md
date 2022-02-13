@@ -34,7 +34,7 @@ clf.fit(X_train, y_train)
 
 sort_index = np.argsort(clf.feature_importances_)
 fig, ax = plt.subplots(1, figsize=(10, 2), dpi=100)
-plt.barh(y=np.array(y_names[sort_index]),
+plt.barh(y=np.array(y_names)[sort_index],
          width=clf.feature_importances_[sort_index])
 ax.set(xticks=[], xlabel='Feature importance')
 [ax.spines[pos].set_visible(False) for pos in ('right', 'bottom', 'top')];
@@ -55,7 +55,7 @@ r = permutation_importance(model, X_test, y_test)
 importance_index = np.argsort(r.importances_mean)
 
 fig, ax = plt.subplots(1, figsize=(10, 2), dpi=100)
-plt.barh(y=np.array(y_names[importance_index]),
+plt.barh(y=np.array(y_names)[importance_index],
          width=r.importances_mean[importance_index],
          xerr=r.importances_std[importance_index])
 ax.set(xticks=[], xlabel='Feature importance')
