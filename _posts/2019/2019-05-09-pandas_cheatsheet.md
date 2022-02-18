@@ -183,8 +183,10 @@ Nano | 'N' | one nanosecond
 df.isnull()
 df.dropna() # how='all' if all the fields are missing, thres=2 if at least two good
 df.fillna({'id': 0, 'name': 'unknown'}) # or just df.fillna(-999) or by interpolation method='bfill'
-df.['age'].fillna(df.['age'].mean(skipna=True), inplace=True) # fix a signle column
+df['age'].fillna(df['age'].mean(skipna=True), inplace=True) # fix a signle column
+df.fillna(method='ffill', inplace=True) # forward filling
 df.interpolate() # linear interpolation on missing data
+df['A'].fillna(value=df['A'].mode()[0], inplace=True) #most frequent entry for categorical data
 
 df.replace({'col_name1':{
                 'replace this':'with_this',
