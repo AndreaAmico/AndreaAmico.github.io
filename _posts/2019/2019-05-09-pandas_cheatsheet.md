@@ -40,6 +40,9 @@ df['year'] = pd.Series(['a', 'b', 'c'], index=[1, 2, 9]) # ok (fills with NaN an
 
 df.drop(['year'], axis=1, inplace=True) # drop column
 df.drop([1], axis=0, inplace=True) # drop row
+
+df.rename(columns={"col1": "A", "col2": "B"}, inplace=True) #rename columns with dictionary
+df.rename(columns=lambda c: 'my_prefix_'+c, inplace=True) ##rename columns with lambda function
 ```
 
 ### Load data
