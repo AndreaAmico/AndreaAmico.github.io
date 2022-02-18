@@ -211,8 +211,18 @@ g = df.groupby('col_name')
 for group_element_name, group_element_df in g:
     pass
 
+group_keys = [key for key, _ in g] #faster than g.groups.keys()
 g.get_group('group name')
-g.mean() # or sum or plot 
+
+
+# Aggregations
+g.mean() # or sum or plot
+g.mean().reset_index() # to flatten out the output
+g.agg(['min', 'max'])
+
+g.agg(
+    b_min=pd.NamedAgg(column='B', aggfunc=np.min),
+    c_sum=pd.NamedAgg(column='C', aggfunc=np.sum))
 
 
 df.pivot(index='date', columns='city', values='temperature')
