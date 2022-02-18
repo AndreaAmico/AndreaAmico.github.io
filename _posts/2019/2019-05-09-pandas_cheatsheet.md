@@ -219,12 +219,18 @@ g.get_group('group name')
 g.mean() # or sum or plot
 g.mean().reset_index() # to flatten out the output
 g.agg(['min', 'max'])
-
 g.agg(
     b_min=pd.NamedAgg(column='B', aggfunc=np.min),
     c_sum=pd.NamedAgg(column='C', aggfunc=np.sum))
+    
+def my_agg_func(group):
+    return pd.Series(dict(
+        mean_B = np.mean(group['B']),
+        sum_B_C = np.sum(group['B']) + np.sum(group['C'])
+    ))
+g.apply(my_agg_func)
 
-
+# Pivot
 df.pivot(index='date', columns='city', values='temperature')
 df.pivot_table(index='date', columns='city', aggfunc='mean') #margins=True
 df.pivot_table(pd.Grouper(freq='M', key='date'), columns='temperature')
