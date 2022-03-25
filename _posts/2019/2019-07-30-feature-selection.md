@@ -131,7 +131,7 @@ plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
     wspace=1, hspace=None)
 ```
 
-<p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/pca.png" alt="pca_comparison" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/dimensionality_reduction/pca_tsne.png" alt="pca_comparison" width="800"></p>
 
 
 
