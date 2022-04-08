@@ -95,7 +95,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         return X, y
 
     def on_epoch_end(self):
-        self.indexes = np.arange(len(self.splits))
+        self.indexes = np.arange(self.data_len)
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 ```
