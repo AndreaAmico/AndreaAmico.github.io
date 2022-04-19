@@ -5,13 +5,13 @@ date:   2022-04-18 20:00:00 +0100
 categories: data-analysis
 ---
 
-A simple method to test the presence and locate a discontinuity in a linear trend is to exploit the Chow statistics [(see wiki)](https://en.wikipedia.org/wiki/Chow_test). The idea is the following: we split the dataset in two chunks by cutting it along the x axis (multiple times). We separately perform linear fits on the two subsets and we compare the residuals to the residuals obtain via a single linear fit on the full dataset, obtaining the Chow coefficient. As we can see in the following animation, if there is a discontinuity on data, it will be highlighted by a higher Chow coefficient. 
+A simple method to test the presence and locate a discontinuity in a linear trend is to exploit the Chow statistics [(see wiki)](https://en.wikipedia.org/wiki/Chow_test). The idea is the following: we split the dataset into two chunks by cutting it along the x-axis (multiple times). We separately perform linear fits on the two subsets and we compare the residuals to the residuals obtained via a single linear fit on the full dataset, obtaining the Chow coefficient. As we can see in the following animation, if there is a discontinuity in data, it will be highlighted by a higher Chow coefficient. 
 
 <p style="text-align:center;"><img src="/asset/images/data-exploration/chow_animation.gif" alt="chow animation" width="800"></p>
 
 
 ## Code
-Here is the code to find the maximum Chow coefficient in a given dataset. Note that we can change the `cuts_num` argument to increase and decrease the number of cuts of the dataset. The function `find_max_chow` also returns informations about the linear fits corresponding to the cut location of the max Chow coefficient found.
+Here is the code to find the maximum Chow coefficient in a given dataset. Note that we can change the `cuts_num` argument to increase and decrease the number of cuts in the dataset. The function `find_max_chow` also returns information about the linear fits corresponding to the cut location of the max Chow coefficient found.
 
 ```python
 import numpy as np
@@ -34,8 +34,8 @@ def get_chow_test_statistics(x1, y1, x2, y2, res_tot):
     return chow_nom / chow_denom
 
 def find_max_chow(x, y, cuts_num=30, min_points=5):
-    """Given a dataset x-y finds the max Chow coefficient splitting the dataset in two different segments
-    `cuts_num` times, considering a minumum of `min_points` for a single segment.
+    """Given a dataset x-y finds the max Chow coefficient splitting the dataset into two different segments
+    `cuts_num` times, considering a minimum of `min_points` for a single segment.
     Returns the max Chow coefficient and the fitting information corresponding to the max Chow data split.
     """
     x, y = zip(*sorted(zip(x, y), key=lambda x: x[0]))
@@ -94,6 +94,17 @@ ax.plot(xx_2, yy_2, label='segment 2')
 ax.legend()
 ax.set(xlim=(0,10), ylim=(-5, 15), xlabel='Independent variable', ylabel='Dependent variable');
 ```
-<p style="text-align:center;"><img src="/asset/images/data-exploration/chow_static.png" alt="chow example" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/data-exploration/chow_static.png" alt="chow example" width="400"></p>
 
- 
+ Here's the `fit_info` content:
+ ```python
+ {'delta_slope': -0.08266169591013839,
+ 'delta_y': -7.134722387034087,
+ 'off_1': 8.082278352912864,
+ 'off_2': 1.335932153868587,
+ 'off_tot': 10.306358145838905,
+ 'slope_1': 0.25244503819910913,
+ 'slope_2': 0.16978334228897074,
+ 'slope_tot': -0.9272940623397588,
+ 'x_cut_position': 5.176520171495405}
+ ```
