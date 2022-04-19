@@ -94,6 +94,6 @@ ax.plot(xx_2, yy_2, label='segment 2')
 ax.legend()
 ax.set(xlim=(0,10), ylim=(-5, 15), xlabel='Independent variable', ylabel='Dependent variable');
 ```
-<p style="text-align:center;"><img src="/asset/images/data-exploration/chow_static.gif" alt="chow animation" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/data-exploration/chow_static.png" alt="chow example" width="800"></p>
 
  
