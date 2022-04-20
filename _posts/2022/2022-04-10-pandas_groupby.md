@@ -78,16 +78,16 @@ df.groupby('A_cat').get_group('1.0')  # get a single group by name
 df.groupby(['A_cat', 'B_cat']).apply(custom_agg).head()
 ```
 
-<p style="text-align:center;"><img src="/asset/images/pandas/groupby_double.PNG" alt="apply" hight="400"></p>
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_double.PNG" alt="apply" hight="300"></p>
 
 ```python
 df.groupby(['A_cat', 'B_cat']).apply(custom_agg).unstack().head()
 ```
 
-<p style="text-align:center;"><img src="/asset/images/pandas/groupby_unstack.PNG" alt="apply" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_unstack.PNG" alt="apply" hight="300"></p>
 
 ```python
 df.groupby(['A_cat', 'B_cat']).apply(custom_agg).swaplevel(axis='index').unstack().head()
 ```
 
-<p style="text-align:center;"><img src="/asset/images/pandas/groupby_swap_unstack.PNG" alt="apply" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_swap_unstack.PNG" alt="apply" hight="300"></p>
