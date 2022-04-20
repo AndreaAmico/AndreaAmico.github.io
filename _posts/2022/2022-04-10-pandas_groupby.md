@@ -20,6 +20,7 @@ df = (df
 
 df.head()
 ```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_dummy.PNG" alt="index" hight="300"></p>
 
 ## Filtering
 Select data such that grouping by `A_cat` will result in groups of 20 or more elements:
