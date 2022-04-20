@@ -64,3 +64,26 @@ df.groupby('A_cat').apply(custom_agg)
 ```
 <p style="text-align:center;"><img src="/asset/images/pandas/groupby_apply.PNG" alt="apply" hight="300"></p>
 
+## Utilities
+```python
+df.groupby('A_cat').ngroups           # get number of groups
+df.groupby('A_cat').groups            # get dictionary of data grouped
+df.groupby('A_cat').size()            # get the size of each group
+df.groupby('A_cat').groups.keys()     # get the groups name
+df.groupby('A_cat').get_group('1.0')  # get a single group by name
+```
+
+## Multiple grouping
+```python
+df.groupby(['A_cat', 'B_cat']).apply(custom_agg).head()
+```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_double.PNG" alt="apply" width="800"></p>
+
+```python
+df.groupby(['A_cat', 'B_cat']).apply(custom_agg).unstack().head()
+```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_unstack.PNG" alt="apply" width="800"></p>
+```python
+df.groupby(['A_cat', 'B_cat']).apply(custom_agg).swaplevel(axis='index').unstack().head()
+```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_swap_unstack.PNG" alt="apply" width="800"></p>
