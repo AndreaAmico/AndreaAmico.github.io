@@ -20,7 +20,7 @@ df = (df
 
 df.head()
 ```
-<p style="text-align:center;"><img src="/asset/images/pandas/groupby_dummy.PNG" alt="index" hight="300"></p>
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_dummy.PNG" alt="dummy dataset" hight="300"></p>
 
 ## Filtering
 Select data such that grouping by `A_cat` will result in groups of 20 or more elements:
@@ -48,6 +48,8 @@ df.groupby('A_cat').agg(
     D_sem = ('D', 'sem')
 )
 ```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_agg.PNG" alt="agg" hight="300"></p>
+
 For custom aggregations, which need mixing more columns we can use the `apply` function:
 ```python
 def custom_agg(df):
@@ -60,4 +62,5 @@ def custom_agg(df):
 
 df.groupby('A_cat').apply(custom_agg)
 ```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_apply.PNG" alt="apply" hight="300"></p>
 
