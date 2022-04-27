@@ -5,21 +5,13 @@ date:   2022-04-10 20:00:00 +0100
 categories: data-analysis
 ---
 
-## Create a dummy dataset
-```python
-import pandas as pd
-import numpy as np
+Here we show a few examples of how to use the pandas **groupby** function to:
 
-np.random.seed(42)
-df = pd.DataFrame(np.random.normal(0, 2, size=(200,4)), columns=['A', 'B', 'C', 'D'])
+- Filter data: select groups with given characteristics
+- Transform data: add a new column based on group characteristics (e.g. normalization within groups)
+- Aggregation: calculate aggregative quantities for each group
 
-df = (df
-        .assign(A_cat = lambda df: np.round(df.A).astype('str')).drop('A', axis=1)
-        .assign(B_cat = lambda df: np.round(df.B)).drop('B', axis=1)
-)
-
-df.head()
-```
+All the examples are based on a dummy dataset like the following one: `A_cat` and `B_cat` are categorical variables, while `C` and `D` are numerical. The code to generate the dummy dataset can be found at the bottom of the page.
 <p style="text-align:center;"><img src="/asset/images/pandas/groupby_dummy.PNG" alt="dummy dataset" hight="300"></p>
 
 ## Filtering
@@ -91,3 +83,20 @@ df.groupby(['A_cat', 'B_cat']).apply(custom_agg).swaplevel(axis='index').unstack
 ```
 
 <p style="text-align:center;"><img src="/asset/images/pandas/groupby_swap_unstack.PNG" alt="apply" hight="300"></p>
+
+
+### Create a dummy dataset
+```python
+import pandas as pd
+import numpy as np
+
+np.random.seed(42)
+df = pd.DataFrame(np.random.normal(0, 2, size=(200,4)), columns=['A', 'B', 'C', 'D'])
+
+df = (df
+        .assign(A_cat = lambda df: np.round(df.A).astype('str')).drop('A', axis=1)
+        .assign(B_cat = lambda df: np.round(df.B)).drop('B', axis=1)
+)
+
+df.head()
+```
