@@ -5,12 +5,15 @@ date:   2022-05-12 20:00:00 +0100
 categories: data-analysis
 ---
 
+**NB: the described functionalities are tested on the Databricks environment. To run the following code on Google Colab check the last section `Pyspark on Google Colab`**
 
 
 # Pandas to spark
 We can create a Spark dataframe starting from a Pandas dataframe using the function `spark.createDataFrame`:
 ```python
 import pyspark
+import pandas as pd
+import numpy as np
 
 DATA_LEN = 5
 
@@ -53,7 +56,8 @@ Delta tables are more complex data structures which allow functionality like hig
 ```python
 df_foo.write.format("delta").mode("append").partitionBy("A","D").save(DATA_PATH)
 ```
-We can use delts tables as qsl tables with addictional functionalities:
+
+**On the Databricks platform** we can handle delta tables files as they were qsl tables with additional functionalities:
 ```python
 query_merge =   f"""
   MERGE INTO delta.`{DATA_PATH}` AS target
@@ -94,7 +98,14 @@ This allows us to use the view as a real sql table:
 describe table foo_view
 ```
 
-## SELECT FROM WHERE syntax
+On Google Colab we can perform sql queries using the pyspark library:
+```python
+spark.sql("""
+    DESCRIBE TABLE foo_view
+    """).show()
+```
+
+### SELECT FROM WHERE syntax
 ```sql
 %sql
 SELECT *  
@@ -102,7 +113,7 @@ FROM foo_view
 WHERE C >= 8
 ```
 
-## Groupby operations
+### Groupby operations
 ```sql
 %sql
 SELECT A, mean(C)
@@ -119,7 +130,7 @@ GROUP BY A
 ORDER BY C_mean desc
 ```
 
-## Join operations
+### Join operations
 ```sql
 %sql
 SELECT foo_first.A, foo_first.B_max, foo_second.C_mean, num
@@ -142,11 +153,28 @@ ON (foo_first.A = foo_second.A)
 
 
 # Pyspark on Google Colab
+```python
+!apt-get install openjdk-11-jdk-headless -qq > /dev/null
+!wget -q https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop3.2.tgz #change version
+!tar xf spark-3.0.0-bin-hadoop3.2.tgz #match version
+!pip -q install findspark
 ```
-!pip install pyspark --quiet
-!pip install -U -q PyDrive --quiet 
-!apt install openjdk-8-jdk-headless &> /dev/null
+
+```python
+import os
+os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-11-openjdk-amd64"
+os.environ["SPARK_HOME"] = "/content/spark-3.0.0-bin-hadoop3.2" #match version
+os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages io.delta:delta-core_2.12:0.7.0 --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog pyspark-shell'
 ```
 
+```python
+import findspark
+findspark.init()
+```
 
-
+```python
+from pyspark.sql import SparkSession
+import pyspark
+import pyspark.sql.functions as F
+spark = SparkSession.builder.appName('foo_session').getOrCreate()
+```
