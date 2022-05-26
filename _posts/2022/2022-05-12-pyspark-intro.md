@@ -5,6 +5,8 @@ date:   2022-05-12 20:00:00 +0100
 categories: data-analysis
 ---
 
+
+
 # Pandas to spark
 We can create a Spark dataframe starting from a Pandas dataframe using the function `spark.createDataFrame`:
 ```python
@@ -139,6 +141,12 @@ ON (foo_first.A = foo_second.A)
 ```
 
 
+# Pyspark on Google Colab
+```
+!pip install pyspark --quiet
+!pip install -U -q PyDrive --quiet 
+!apt install openjdk-8-jdk-headless &> /dev/null
+```
 
 
 
