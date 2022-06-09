@@ -20,7 +20,10 @@ from shapely.geometry import Polygon, Point
 %autoreload 2
 ```
 
-
+### Install Geopandas using Conda (2022)
+```
+conda install -c conda-forge fiona python=3.9 fiona shapely rasterio pyproj pandas geopandas
+```
 
 ### Geopandas load shape file
 
