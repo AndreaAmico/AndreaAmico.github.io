@@ -45,6 +45,12 @@ ax.set(yticks=range(5), yticklabels=['I', 'II', 'III', 'IV', 'V']);
 ```
 <p style="text-align:center;"><img src="/asset/images/matplotlib/set_colors.svg" alt="set colors" width="550"></p>
 
+### Rotate tick labels
+```python
+ax.tick_params(axis='x', labelrotation=45)
+```
+
+
 ### Padding ticks and labels
 ```python
 ax.tick_params(axis='x', direction='out', pad=-3)
