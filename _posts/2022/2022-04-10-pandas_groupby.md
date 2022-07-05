@@ -85,6 +85,15 @@ df.groupby(['A_cat', 'B_cat']).apply(custom_agg).swaplevel(axis='index').unstack
 <p style="text-align:center;"><img src="/asset/images/pandas/groupby_swap_unstack.PNG" alt="apply" hight="300"></p>
 
 
+### Grouping using index
+The grouping can be based on the dataframe index by using a mapping function:
+```python
+df.groupby(lambda idx: (idx%3)==True).sum()
+```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_index_lambda.PNG" alt="apply" hight="300"></p>
+
+
+
 ### Create a dummy dataset
 ```python
 import pandas as pd
