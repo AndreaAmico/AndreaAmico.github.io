@@ -92,6 +92,17 @@ df.groupby(lambda idx: (idx%3)==True).sum()
 ```
 <p style="text-align:center;"><img src="/asset/images/pandas/groupby_index_lambda.PNG" alt="apply" hight="300"></p>
 
+### Grouping using bins
+
+Grouping can be performed using a list of labels (sharing same len with dataframe). E.g. one can bin the data using the pandas [cut](https://pandas.pydata.org/docs/reference/api/pandas.cut.htm) function.
+```python
+df.groupby(pd.cut(df.B_cat,
+                  np.linspace(-8, 8, 6),
+                  labels=['Very low', 'Low', 'Medium', 'High', 'Very high'])
+            )[['C', 'D']].mean()
+```
+<p style="text-align:center;"><img src="/asset/images/pandas/groupby_bins.PNG" alt="apply" hight="300"></p>
+
 
 
 ### Create a dummy dataset
