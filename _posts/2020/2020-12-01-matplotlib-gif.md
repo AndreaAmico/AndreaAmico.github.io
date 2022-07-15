@@ -11,7 +11,7 @@ Simple API for creating gif animation using [matplotlib](https://matplotlib.org/
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import imageio, os
+import os, imageio.v2 as imageio
 
 class Gif_maker(object):
     def __init__(self, buffer_folder='./buffer-gif-maker', fps=10, palettesize=256):
