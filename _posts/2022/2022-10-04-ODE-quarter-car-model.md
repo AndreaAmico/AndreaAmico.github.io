@@ -5,14 +5,62 @@ date:   2022-10-04 20:00:00 +0100
 categories: data-analysis
 ---
 
-Here we show how one can use scipy to solve a simple differential equation. We use the so called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. 
-
-
+Here we show how one can use scipy to solve a simple differential equation. We use the so called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. The equations of motions to solve are the following:
 
 <p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation" higth="300"></p>
 
 
-## Code
-Here is the code to find the maximum Chow coefficient in a given dataset. Note that we can change the `cuts_num` argument to increase and decrease the number of cuts in the dataset. The function `find_max_chow` also returns information about the linear fits corresponding to the cut location of the max Chow coefficient found.
+In python we need to create a function witch takes as inputs the time, the position and speed of the mass and unsprung mass, the constant parameters and the road profile:
 
-<p style="text-align:center;"><img src="/asset/images/data-exploration/chow_static.png" alt="chow example" width="400"></p>
+```python
+def quarter_car(t, y, ms, mu, kd, kt, cd, road_function):
+    zs, vs, zu, vu = y
+    zp = road_function(t)
+    
+    d1_zs = vs
+    d2_zs = (kd*(zu-zs) + cd*(vu-vs))/ms
+
+    d1_zu = vu
+    d2_zu = (-kd*(zu-zs)-cd*(vu-vs)+kt*(zp-zu))/mu
+
+    dydt = [d1_zs, d2_zs, d1_zu, d2_zu]
+    return dydt
+```
+
+
+## Code
+First we need to import the following libraries. Gaussian filter and interpolation will be used to generate a random road profile.
+```python
+from scipy.integrate import solve_ivp
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.interpolate import interp1d
+from scipy.ndimage.filters import gaussian_filter
+```
+
+We create a random road profile:
+
+```python
+profile_length = 150 #m
+resolution = 0.005 #m
+speed = 80 #Km/h
+km_h_to_m_s = 1/3.6
+amplitude = 0.5
+sigma_gaussian_filter = 500
+
+np.random.seed(41)
+profile = pd.DataFrame(dict(
+    pc = np.arange(0, profile_length, resolution),
+    h = gaussian_filter(np.random.uniform(-amplitude, amplitude, size=int(profile_length/resolution)), sigma_gaussian_filter)
+  ))
+profile['t'] = profile['pc']/(speed*km_h_to_m_s)
+profile.plot(x='t', y='h', figsize=(15,3));
+```
+<p style="text-align:center;"><img src="/asset/images/scipy/road_profile.png" alt="road_profile" width="800"></p>
+
+
+
+
+
+
