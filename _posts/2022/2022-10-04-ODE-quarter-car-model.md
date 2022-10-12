@@ -12,11 +12,11 @@ Here we show how one can use scipy to solve a simple differential equation. We u
 - Tire: mass = `m_u` (unsuspended), hight = `zu`, and elestic coefficient = `kt`
 - Dumper-spring system: dumping coefficient = `cd`, and elestic coefficient = `kd`
 
-<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_scheme.png" alt="quarter_car_scheme" higth="150"></p>
+<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_scheme.png" alt="quarter_car_scheme" height="300"></p>
 
 The equations of motions to solve are the following:
 
-<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation" higth="300"></p>
+<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation" height="300"></p>
 
 
 In python we need to create a function witch takes as inputs the time (`t`)
