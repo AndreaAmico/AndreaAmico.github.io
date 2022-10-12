@@ -4,6 +4,7 @@ title:  "ODE: quarted car model solver with scipy"
 date:   2022-10-04 20:00:00 +0100
 categories: other
 ---
+a
 
 <p style="text-align:center;"><img src="/asset/images/scipy/cq.gif" alt="quarter_car_animation" width="800"></p>
 
