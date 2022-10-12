@@ -8,7 +8,9 @@ categories: other
 <p style="text-align:center;"><img src="/asset/images/scipy/qc.gif" alt="quarter_car_animation" width="1000"></p>
 
 Here we show how one can use scipy to solve a simple differential equation. We use the so called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. As shown in the scheme below, the components of the system are the following:
-- Suspenmded mass: mass=$m_s$ and hight=$z_s$
+- Suspended mass: mass = `ms`, and hight = `zs`
+- Tire: mass = `m_u` (unsuspended), hight = `zu`, and elestic coefficient = `kt`
+- Dumper-spring system: dumping coefficient = `cd`, and elestic coefficient = `kd`
 
 <p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_scheme.png" alt="quarter_car_scheme" higth="250"></p>
 
