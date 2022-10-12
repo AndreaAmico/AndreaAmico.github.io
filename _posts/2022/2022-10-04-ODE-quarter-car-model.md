@@ -16,7 +16,7 @@ Here we show how one can use scipy to solve a simple differential equation. We u
 
 The equations of motions to solve are the following:
 
-<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation"></p>
+<p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation" height="100"></p>
 
 
 In python we need to create a function witch takes as inputs the time (`t`)
