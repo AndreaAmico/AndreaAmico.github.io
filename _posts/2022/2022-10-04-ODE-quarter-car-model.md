@@ -5,7 +5,7 @@ date:   2022-10-04 20:00:00 +0100
 categories: other
 ---
 
-<p style="text-align:center;"><img src="/asset/images/scipy/qc.gif" alt="quarter_car_animation" width="800"></p>
+<p style="text-align:center;"><img src="/asset/images/scipy/qc.gif" alt="quarter_car_animation" width="1000"></p>
 
 Here we show how one can use scipy to solve a simple differential equation. We use the so called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. The equations of motions to solve are the following:
 
