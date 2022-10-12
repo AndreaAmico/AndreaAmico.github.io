@@ -1,16 +1,16 @@
 ---
 layout: post
-title:  "ODE: quarted car model solver with scipy"
+title:  "ODE: quarter car model solver with scipy"
 date:   2022-10-04 20:00:00 +0100
 categories: other
 ---
 
 <p style="text-align:center;"><img src="/asset/images/scipy/qc.gif" alt="quarter_car_animation" width="1000"></p>
 
-Here we show how one can use scipy to solve a simple differential equation. We use the so called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. As shown in the scheme below, the components of the system are the following:
+Here we show how one can use scipy to solve a simple differential equation. We use the so-called quarter car model as an example. This simple model describes the motion of a mass connected to a deformable wheel through a dumper-spring system. As shown in the scheme below, the components of the system are the following:
 - Suspended mass: mass = `ms`, and hight = `zs`
-- Tire: mass = `m_u` (unsuspended), hight = `zu`, and elestic coefficient = `kt`
-- Dumper-spring system: dumping coefficient = `cd`, and elestic coefficient = `kd`
+- Tire: mass = `m_u` (unsuspended), hight = `zu`, and elastic coefficient = `kt`
+- Dumper-spring system: dumping coefficient = `cd`, and elastic coefficient = `kd`
 
 <p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_scheme.png" alt="quarter_car_scheme" height="300"></p>
 
@@ -19,7 +19,12 @@ The equations of motions to solve are the following:
 <p style="text-align:center;"><img src="/asset/images/scipy/quarter_car_eq.png" alt="quarter_car_equation" height="70"></p>
 
 
-In python we need to create a function witch takes as inputs the time (`t`)
+In python we need to create a function that takes as inputs:
+- `t`: the time step
+- `y`: the list of variables that will be integrated (position of the wheel and the suspended mass, and their derivative of positions in this example)
+- other constants and parameters
+
+The function needs to return the derivative of the variables contained in `y` (the first and second derivative of the positions).
 
 ```python
 def quarter_car(t, y, ms, mu, kd, kt, cd, road_function):
@@ -38,7 +43,7 @@ def quarter_car(t, y, ms, mu, kd, kt, cd, road_function):
 
 
 ## Code
-First we need to import the following libraries. Gaussian filter and interpolation will be used to generate a random road profile.
+To solve the equation using python we first need to import the following libraries. Note that the gaussian filter and interpolation are necessary only within this example and will be used to generate a random road profile.
 ```python
 from scipy.integrate import solve_ivp
 import numpy as np
@@ -48,7 +53,7 @@ from scipy.interpolate import interp1d
 from scipy.ndimage.filters import gaussian_filter
 ```
 
-We create a random road profile:
+We now generate a random road profile:
 
 ```python
 profile_length = 150 #m
@@ -89,7 +94,8 @@ def quarter_car(t, y, ms, mu, kd, kt, cd, road_function):
     return dydt
 ```
 
-We finally use scipy to solve the equations and plot the results:
+We finally use scipy to solve the equations and plot the results. The generated array `sol.y` will contain the positions and their first derivatives. Here, since we are interested in plotting only the position of the wheel and suspended mass we will use `sol.y[0,:]` and `sol.y[2,:]`.
+
 ```python
 y0 = [road_function(0),0,road_function(0),0]
 dt = 0.01
@@ -121,5 +127,3 @@ plt.show()
 ```
 
 <p style="text-align:center;"><img src="/asset/images/scipy/solution_plot.png" alt="solution plot" width="800"></p>
-
-
