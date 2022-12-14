@@ -7,9 +7,9 @@ categories: data-analysis
 
 The following is a simple script to perform a quick EDA of a Pandas dataframe. For a more complete analysis one can use one of the following libraries:
 
-- (dataprep)[https://docs.dataprep.ai/index.html#]: collect, explore and clean all in one tool.
-- (pandasprofiling)[https://github.com/ydataai/pandas-profiling]: perfect for html reports.
-- (sweetviz)[https://pypi.org/project/sweetviz/]: best for dataset comparison.
+- [dataprep](https://docs.dataprep.ai/index.html#): collect, explore and clean all in one tool.
+- [pandasprofiling](https://github.com/ydataai/pandas-profiling): perfect for html reports.
+- [sweetviz](https://pypi.org/project/sweetviz/): best for dataset comparison.
 
 --------------------
 
