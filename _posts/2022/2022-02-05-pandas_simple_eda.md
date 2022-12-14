@@ -13,7 +13,7 @@ The following is a simple script to perform a quick EDA of a Pandas dataframe. F
 
 --------------------
 
-In the following code we `df` is the pandas dataframe to be analyzed and `df_out` is the output eda dataframe.
+In the following code `df` is the pandas dataframe to be analyzed and `df_out` is the output eda dataframe.
 
 ```python
 import numpy as np
