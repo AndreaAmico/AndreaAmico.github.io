@@ -124,6 +124,9 @@ dt = pd.date_range('01-01-2017', '01-11-2017')
 idx = pd.DatetimeIndex(dt)
 df.reindex(idx)
 
+# Time grouper
+pd.Grouper(freq='M', key='date')
+
 ```
 #### Resample strings
 
@@ -235,11 +238,14 @@ def my_agg_func(group):
     ))
 g.apply(my_agg_func)
 
+# Time grouper
+pd.Grouper(freq='M', key='date')
+
 # Pivot
 df.pivot(index='date', columns='city', values='temperature')
 df.pivot_table(index='date', columns='city', aggfunc='mean') #margins=True
 df.pivot_table(pd.Grouper(freq='M', key='date'), columns='temperature')
-pd.melt(df, id_vars=['keep_col_1', 'keep_col_2'..], var_name='var_name', value_name='value_name')
+pd.melt(df, id_vars=['keep_col_1', 'keep_col_2', ...], value_vars=[value_to_melt_1, value_to_melt_2, ...])
 pd.cross_tab(df.job_title, df.gender, aggfunc='count') # margins=True, normalize='index'
 
 # Resampling non-timeseries data
