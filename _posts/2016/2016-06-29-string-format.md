@@ -7,8 +7,17 @@ categories: python
 
 
 Recap of `.format()` method ([here](https://pyformat.info/ "https://pyformat.info/") for a more detailed description).
-**NB: Multiple spaces are represented with underscores.**
 
+
+-----------------------------
+```python
+f'{1000000000:_}'  # {:,} gives similar results with comma
+```
+
+"1_000_000_000"
+-----------------------------
+
+**NB: Multiple spaces are represented with underscores.**
 -----------------------------
 ```python
 f'{42:4d}'
@@ -30,18 +39,31 @@ f'{100000:.2e}'
 -----------------------------
 
 ```python
-f'{'test':>10}'
+f'{"test":>10}'  # ^ to center align, < to left align
 ```
 "______test"
 
 -----------------------------
+
 ```python
-f'{'test':10}'
+f'{"test":*>10}'
 ```
-"test______"
+"******test"
 
 -----------------------------
 ```python
-f'{test:^10}'
+from datetime import datetime
+
+now: datetime = datetime.now()
+f'{now:%d-%m-%y (%H.%M.%S)}'
 ```
-"__ test __"
+"14-03-24 (08.08.10)"
+
+-----------------------------
+
+```python
+a: int = 2
+f'{a + a = }'
+```
+"a + a = 4"
+
