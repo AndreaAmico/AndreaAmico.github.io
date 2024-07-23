@@ -211,6 +211,7 @@ df[['name','id']].sort_values(ascending=[False,True], by=['id', 'name'])
 s.value_counts() # number of non NaN items
 df.col_name.nunique() # number of unique values
 
+df.loc[df['condition_column']=='my_filter', 'column'] = 42 # manually set 42 into a group of locations
 ```
 
 ### Grouping
