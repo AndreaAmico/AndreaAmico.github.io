@@ -25,3 +25,7 @@ git checkout feature
  git commit
  git push origin feature
  ```
+
+
+### Extra github trick
+Quickely edit the repository using VSCode online by changing **github.com** to **github.dev** in the repository link.
