@@ -2,10 +2,10 @@
 title: Code pills
 email: amico.andrea.90@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  I'm just too lazy to use dropbox or GitHub to copy-paste code for everyday science scripts.
-  Need to fit some cute data points? Need to analyze your favorite images?
-  Need 20 lines of code to write a trash GUI you will use for a couple of weeks?
-  If you want to steal something, feel free to copy-paste at your own risk, you will probably find a forest of bugs.
+  I'm just too lazy to use Dropbox or GitHub for copying and pasting code for my everyday science scripts.
+  Need to fit some cute data points? Want to analyze your favorite images?
+  Looking for 20 lines of code to create a simple GUI you'll use for a couple of weeks?
+  If you want to take something, feel free to copy and paste at your own risk—you’ll likely encounter a forest of bugs!
 
 url: "http://andreaamico.github.io" # the base hostname & protocol for your site
 github_username:  AndreaAmico
