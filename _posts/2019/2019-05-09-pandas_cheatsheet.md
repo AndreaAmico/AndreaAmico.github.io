@@ -5,7 +5,12 @@ date:   2019-05-09 22:00:00 +0100
 categories: data-analysis
 ---
 
-
+### Global settings
+{% include _html/menu_pandas_.html %}
+```python
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', 150)
+```
 
 ### DataFrame
 {% include _html/menu_pandas_.html %}
