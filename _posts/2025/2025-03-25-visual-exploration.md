@@ -70,4 +70,4 @@ fig.write_html('./myplot.html')
 fig
 ```
 
-{% include asset/images/data-exploration/fillingExploration.html %}
+{% include _html/_posts/fillingExploration.html %}
