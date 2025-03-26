@@ -27,5 +27,35 @@ git checkout feature
  ```
 
 
+
+### How to fix a push in a wrong branch:
+
+Identify commit sha (-3 to see last 3 commits):
+```bash
+git log -1
+ ```
+
+Copy COMMIT_SHA.
+
+Checkout to the wrong_branch you just pushed (probably already there):
+```bash
+git checkout wrong_branch
+ ```
+Revert the commit (repeat for any other commit sha you want to revert - starting from the most recent):
+```bash
+git revert COMMIT_SHA
+ ```
+Push remote if needed (git push -f).
+
+Checkout to the good branch:
+```bash
+git checkout good_branch
+ ```
+Cherry pick the commit you want to recover (repeat for any other commit sha you want to revert - starting from the most recent):
+```bash
+git cherry-pick COMMIT_SHA
+ ```
+
+
 ### Extra github trick
 Quickely edit the repository using VSCode online by changing **github.com** to **github.dev** in the repository link.
