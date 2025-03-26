@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Visial Exploration"
+title:  "Visual Exploration"
 date:   2025-03-25 22:00:00 +0100
 categories: data-visualization
 ---
