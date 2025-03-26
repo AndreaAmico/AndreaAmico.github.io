@@ -259,6 +259,16 @@ pd.cross_tab(df.job_title, df.gender, aggfunc='count') # margins=True, normalize
 df.reset_index(drop=True).groupby(by=lambda x: int(x/WINDOW_SIZE), axis=0).mean()
 
 ```
+### Transform
+{% include _html/menu_pandas_.html %}
+```python
+# List explosion
+df = pd.DataFrame({'a':[1, 2, 3], 'b':['x', 'y', 'y']})
+mapping_dict = {"x": ['x'], "y": ["W", "V", "Q"]}
+df['b'] = df.b.apply(lambda x: mapping_dict[x])
+df = df.explode('b')
+
+```
 
 
 ### Join
